@@ -14,25 +14,18 @@ export default function HeroSection({ onShopNowClick }) {
 
   const hotspots = [
     {
-      id: 'cheek',
+      id: 'forehead',
       title: 'Dewy Glass Sheen',
       desc: 'Infused with pure bio-active ceramides & rose water for light-reflecting radiance.',
-      top: '36%',
-      left: '72%'
+      top: '30%',
+      left: '55%'
     },
     {
-      id: 'forehead',
+      id: 'temple',
       title: 'Smooth Cellular Barrier',
       desc: 'Clinically repairs microscopic dryness & environmental oxidative damage.',
-      top: '22%',
-      left: '52%'
-    },
-    {
-      id: 'neck',
-      title: 'Deep 72h Moisture',
-      desc: 'Hyaluronic acid and squalane lock hydration deep into epidermal layers.',
-      top: '72%',
-      left: '48%'
+      top: '36%',
+      left: '68%'
     }
   ];
 
@@ -122,8 +115,19 @@ export default function HeroSection({ onShopNowClick }) {
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
+                objectPosition: 'center 20%',
                 position: 'absolute',
                 inset: 0
+              }}
+            />
+            {/* Elegant Luxury Vignette for text contrast & mood */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(180deg, rgba(14, 14, 18, 0.45) 0%, rgba(14, 14, 18, 0.05) 38%, rgba(14, 14, 18, 0.15) 60%, rgba(14, 14, 18, 0.78) 100%)',
+                pointerEvents: 'none',
+                zIndex: 1
               }}
             />
 
