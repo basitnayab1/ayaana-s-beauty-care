@@ -1,0 +1,455 @@
+/* Ayaana's Luxury Skincare - 3D Design System & Kinetic Typography */
+
+:root {
+  --bg-base: #FDFBF7;
+  --bg-surface: #F8F4EE;
+  --bg-card: #F2ECE4;
+  --bg-card-hover: #EFE6DC;
+  
+  --brand-rose: #E2829F;
+  --brand-rose-light: #F9E7EC;
+  --brand-rose-dark: #C75678;
+  
+  --brand-gold: #D6A685;
+  --brand-gold-light: #F7EFE9;
+  --brand-gold-dark: #B6815E;
+  
+  --text-noir: #121212;
+  --text-charcoal: #2E2B28;
+  --text-muted: #736C65;
+  --text-light: #9B948C;
+
+  --border-subtle: rgba(18, 18, 18, 0.08);
+  --border-card: rgba(18, 18, 18, 0.05);
+  --border-glass: rgba(255, 255, 255, 0.85);
+
+  --shadow-sm: 0 2px 8px rgba(18, 18, 18, 0.04);
+  --shadow-md: 0 10px 30px -5px rgba(18, 18, 18, 0.06);
+  --shadow-lg: 0 20px 40px -10px rgba(18, 18, 18, 0.08);
+  --shadow-luxury: 0 25px 50px -12px rgba(226, 130, 159, 0.16), 0 4px 16px rgba(0, 0, 0, 0.04);
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-noir);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+/* Custom Cursor default hide for links so custom cursor handles it */
+@media (pointer: fine) {
+  a, button, [role="button"] {
+    cursor: pointer;
+  }
+}
+
+/* Typography Helpers */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--text-noir);
+  transition: text-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* Kinetic 3D Text & Glow on Cursor Hover */
+.glow-hover-text {
+  display: inline-block;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, text-shadow;
+}
+
+.glow-hover-text:hover {
+  transform: translateY(-2px) scale(1.02);
+  color: #121212 !important;
+  text-shadow: 0 0 20px rgba(226, 130, 159, 0.7), 0 0 35px rgba(214, 166, 133, 0.4);
+}
+
+h1:hover, h2:hover {
+  text-shadow: 0 4px 25px rgba(226, 130, 159, 0.4);
+}
+
+.font-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-editorial {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.035em;
+}
+
+/* 3D Depth Utilities */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.pop-3d-1 {
+  transform: translateZ(25px);
+  transform-style: preserve-3d;
+}
+
+.pop-3d-2 {
+  transform: translateZ(45px);
+  transform-style: preserve-3d;
+}
+
+.pop-3d-3 {
+  transform: translateZ(65px);
+  transform-style: preserve-3d;
+}
+
+/* Custom Luxury Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: #D8CCC0;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C2B3A4;
+}
+
+/* Layout Utilities */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-sm);
+}
+
+.glass-panel-dark {
+  background: rgba(18, 18, 18, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+}
+
+/* Fluted Glass Effect inspired by SORA reference */
+.fluted-glass-effect {
+  position: relative;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 10px 100%;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-right: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+/* 3D Depth Card Base */
+.card-3d {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  transition: box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-3d:hover {
+  box-shadow: var(--shadow-luxury);
+}
+
+/* Glow Radiance Hotspot Pulse */
+@keyframes radiancePulse {
+  0% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(226, 130, 159, 0.7);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 16px rgba(226, 130, 159, 0);
+  }
+  100% {
+    transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(226, 130, 159, 0);
+  }
+}
+
+.radiance-spot {
+  animation: radiancePulse 2.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Floating animation */
+@keyframes floatSubtle {
+  0%, 100% {
+    transform: translateY(0px) translateZ(0);
+  }
+  50% {
+    transform: translateY(-10px) translateZ(20px);
+  }
+}
+
+.animate-float {
+  animation: floatSubtle 4.5s ease-in-out infinite;
+}
+
+/* Floating 3D Badge Animation */
+@keyframes floatBadge1 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(2deg); }
+}
+
+@keyframes floatBadge2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(-2deg); }
+}
+
+.floating-badge-1 {
+  animation: floatBadge1 5s ease-in-out infinite;
+}
+
+.floating-badge-2 {
+  animation: floatBadge2 6s ease-in-out infinite 0.5s;
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--text-noir);
+  color: #FFFFFF;
+  padding: 14px 28px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.btn-primary:hover {
+  background-color: #2D2A28;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: transparent;
+  color: var(--text-noir);
+  padding: 13px 26px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 14px;
+  border: 1px solid rgba(18, 18, 18, 0.15);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(18, 18, 18, 0.04);
+  border-color: var(--text-noir);
+  transform: translateY(-2px);
+}
+
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #128C7E;
+  color: #FFFFFF;
+  padding: 13px 24px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.btn-whatsapp:hover {
+  background-color: #075E54;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(18, 140, 126, 0.35);
+}
+
+/* Category Filter Pills from Reference */
+.category-pill {
+  padding: 10px 22px;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  white-space: nowrap;
+  background: var(--bg-card);
+  color: var(--text-charcoal);
+}
+
+.category-pill:hover {
+  background: #E8DFD4;
+  transform: translateY(-2px);
+}
+
+.category-pill.active {
+  background: var(--text-noir);
+  color: #FFFFFF;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Drawer & Modal Overlays */
+/* Drawer & Modal Overlays */
+.overlay-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(18, 18, 18, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 9999;
+  animation: fadeIn 0.25s ease-out;
+}
+
+/* Modal Overlay container for dialogs */
+.modal-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes modalScale {
+  from {
+    transform: scale(0.95) translateY(14px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.slide-drawer {
+  animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-content {
+  position: relative;
+  margin: auto;
+  width: 100%;
+  max-height: min(88vh, 880px);
+  display: flex;
+  flex-direction: column;
+  animation: modalScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1000;
+  border-radius: 28px;
+  box-shadow: var(--shadow-luxury);
+  border: 1px solid var(--border-card);
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+.modal-scroll-body {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* On shorter laptop screens or mobile, align from top with comfortable padding */
+@media (max-height: 760px) {
+  .modal-overlay {
+    align-items: flex-start;
+    padding-top: 18px;
+    padding-bottom: 24px;
+  }
+  .modal-content {
+    margin: 0 auto;
+    max-height: 92vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 14px 8px;
+    align-items: flex-end;
+  }
+  .modal-content {
+    border-radius: 22px 22px 0 0;
+    max-height: 94vh;
+  }
+}
+
+
