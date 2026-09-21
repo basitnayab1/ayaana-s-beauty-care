@@ -8,39 +8,30 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
   const [smoothTilt, setSmoothTilt] = useState({ x: 0, y: 0 });
   const animationFrameRef = useRef(null);
 
-  // Lifelike blinking cycle (randomized human blink rhythm with occasional double-blink)
+  // Lifelike slow-motion 60fps blinking cycle (cinematic beauty editorial rhythm)
   useEffect(() => {
     let timeoutId;
     let isMounted = true;
 
     const scheduleNextBlink = () => {
-      // Natural interval between 2.8s and 5.5s
-      const delay = Math.random() * 2700 + 2800;
+      // Serene intervals between 5s and 7.5s
+      const delay = Math.random() * 2500 + 5000;
 
       timeoutId = setTimeout(() => {
         if (!isMounted) return;
         setIsBlinking(true);
 
-        // Blink duration: ~150ms
+        // Slow-motion closed phase: hold closed smoothly
         setTimeout(() => {
           if (!isMounted) return;
           setIsBlinking(false);
 
-          // 25% chance of a realistic quick double-blink
-          if (Math.random() < 0.25) {
-            setTimeout(() => {
-              if (!isMounted) return;
-              setIsBlinking(true);
-              setTimeout(() => {
-                if (!isMounted) return;
-                setIsBlinking(false);
-                scheduleNextBlink();
-              }, 140);
-            }, 120);
-          } else {
+          // Wait for smooth 600ms eye-opening glide before scheduling next
+          setTimeout(() => {
+            if (!isMounted) return;
             scheduleNextBlink();
-          }
-        }, 160);
+          }, 700);
+        }, 520);
       }, delay);
     };
 
@@ -101,10 +92,11 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
     setTilt({ x: 0, y: 0 });
   };
 
-  // Trigger manual blink on click
+  // Trigger manual slow-motion blink on click
   const handleManualBlink = () => {
+    if (isBlinking) return;
     setIsBlinking(true);
-    setTimeout(() => setIsBlinking(false), 200);
+    setTimeout(() => setIsBlinking(false), 520);
   };
 
   return (
@@ -136,7 +128,8 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
           height: '110%',
           transform: `perspective(1000px) rotateX(${smoothTilt.x}deg) rotateY(${smoothTilt.y}deg) translateZ(10px)`,
           transformStyle: 'preserve-3d',
-          transition: 'transform 0.1s ease-out'
+          willChange: 'transform',
+          transition: 'transform 0.08s ease-out'
         }}
       >
         {/* Base Layer: Open Eyes (High-Resolution Studio Skincare Editorial) */}
@@ -155,7 +148,7 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
           }}
         />
 
-        {/* Blinking Layer: Natural Closed Eyes Overlay */}
+        {/* Blinking Layer: Natural Closed Eyes Overlay (Silky 60fps GPU Slow-Motion) */}
         <img
           src="/assets/hero_model_blink.jpg"
           alt=""
@@ -168,7 +161,11 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
             objectFit: 'cover',
             objectPosition: 'center 20%',
             opacity: isBlinking ? 1 : 0,
-            transition: isBlinking ? 'opacity 0.04s ease-in' : 'opacity 0.08s ease-out',
+            transition: isBlinking
+              ? 'opacity 0.48s cubic-bezier(0.4, 0.0, 0.2, 1)'
+              : 'opacity 0.62s cubic-bezier(0.25, 1, 0.5, 1)',
+            willChange: 'opacity',
+            transform: 'translateZ(0)',
             userSelect: 'none',
             pointerEvents: 'none'
           }}
