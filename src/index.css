@@ -450,6 +450,40 @@ h1:hover, h2:hover {
     border-radius: 22px 22px 0 0;
     max-height: 94vh;
   }
+
+  /* Full Screen Mobile Hero Living Portrait */
+  .living-portrait-wrapper {
+    min-height: calc(100svh - 130px) !important;
+    border-radius: 20px !important;
+  }
+
+  .living-portrait-headline-card {
+    left: 16px !important;
+    right: 70px !important;
+    bottom: 18px !important;
+  }
+
+  .living-portrait-headline-card h2 {
+    font-size: 22px !important;
+    line-height: 1.15 !important;
+  }
+
+  .living-portrait-headline-card p {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Compact fluted bar on mobile so face has full breathing room */
+  .living-portrait-fluted-bar {
+    display: none !important;
+  }
+
+  .living-portrait-top-tag {
+    left: 16px !important;
+    top: 14px !important;
+  }
 }
+
 
 

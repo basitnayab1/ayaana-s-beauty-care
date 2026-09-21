@@ -105,11 +105,12 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={handleManualBlink}
+      className="living-portrait-wrapper"
       style={{
         position: 'relative',
         width: '100%',
         height: '100%',
-        minHeight: 'clamp(420px, 52vw, 560px)',
+        minHeight: 'clamp(520px, 85vh, 680px)',
         borderRadius: '28px',
         overflow: 'hidden',
         perspective: '1200px',
@@ -142,7 +143,7 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            objectPosition: 'center 20%',
+            objectPosition: 'center 12%',
             userSelect: 'none',
             pointerEvents: 'none'
           }}
@@ -159,7 +160,7 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            objectPosition: 'center 20%',
+            objectPosition: 'center 12%',
             opacity: isBlinking ? 1 : 0,
             transition: isBlinking
               ? 'opacity 0.48s cubic-bezier(0.4, 0.0, 0.2, 1)'
@@ -175,7 +176,7 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
         <div
           style={{
             position: 'absolute',
-            top: '26%',
+            top: '34%',
             left: `${52 + smoothTilt.y * 1.2}%`,
             width: '120px',
             height: '60px',
@@ -199,12 +200,12 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
         />
       </div>
 
-      {/* Luxury Editorial Vignette (stays framed, enhances text & badges readability) */}
+      {/* Luxury Editorial Vignette */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(180deg, rgba(14, 14, 18, 0.48) 0%, rgba(14, 14, 18, 0.04) 38%, rgba(14, 14, 18, 0.16) 62%, rgba(14, 14, 18, 0.82) 100%)',
+          background: 'linear-gradient(180deg, rgba(14, 14, 18, 0.55) 0%, rgba(14, 14, 18, 0.02) 22%, rgba(14, 14, 18, 0.02) 58%, rgba(14, 14, 18, 0.85) 100%)',
           pointerEvents: 'none',
           zIndex: 2
         }}
@@ -212,93 +213,129 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
 
       {/* Fluted Glass Accent Bar */}
       <div
-        className="fluted-glass-effect"
+        className="fluted-glass-effect living-portrait-fluted-bar"
         style={{
           position: 'absolute',
           left: 0,
           top: 0,
           bottom: 0,
-          width: 'clamp(44px, 10vw, 80px)',
+          width: 'clamp(38px, 8vw, 68px)',
           zIndex: 3,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          padding: 'clamp(18px, 3vw, 28px) 8px',
+          padding: 'clamp(14px, 2.5vw, 24px) 6px',
           backdropFilter: 'blur(14px)',
           background: 'rgba(255, 255, 255, 0.12)',
           borderRight: '1px solid rgba(255, 255, 255, 0.22)'
         }}
       >
-        <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#FFFFFF', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
+        <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#FFFFFF', writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
           AYAANA’S
         </span>
-        <div style={{ width: '1px', height: '60px', background: 'rgba(255, 255, 255, 0.45)', margin: 'auto' }} />
-        <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.95)', writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '0.12em', fontWeight: 600 }}>
+        <div style={{ width: '1px', height: '50px', background: 'rgba(255, 255, 255, 0.45)', margin: 'auto' }} />
+        <span style={{ fontSize: '9px', color: 'rgba(255, 255, 255, 0.95)', writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '0.12em', fontWeight: 600 }}>
           3D LIVING PORTRAIT
         </span>
       </div>
 
-      {/* Kinetic Headline Overlay */}
+      {/* Top Header Tag - Kept cleanly at top above the hijab */}
       <div
+        className="living-portrait-top-tag"
         style={{
           position: 'absolute',
-          top: '28px',
-          left: 'clamp(58px, 14vw, 100px)',
-          right: '20px',
+          top: '16px',
+          left: 'clamp(48px, 11vw, 84px)',
+          right: '16px',
           zIndex: 3,
-          color: '#FFFFFF',
-          textShadow: '0 4px 18px rgba(0, 0, 0, 0.6)'
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '8px'
         }}
       >
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(226, 130, 159, 0.3)', backdropFilter: 'blur(8px)', padding: '4px 10px', borderRadius: '999px', border: '1px solid rgba(255, 255, 255, 0.3)', marginBottom: '8px' }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: 'rgba(20, 20, 24, 0.65)',
+            backdropFilter: 'blur(10px)',
+            padding: '5px 12px',
+            borderRadius: '999px',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
+            color: '#FFFFFF'
+          }}
+        >
           <Sparkles style={{ width: '12px', height: '12px', color: '#FFD700' }} />
           <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Interactive 3D Muse</span>
         </div>
+      </div>
+
+      {/* Kinetic Headline Overlay - Positioned cleanly at the BOTTOM over the niqab cloth (Face is completely clear!) */}
+      <div
+        className="living-portrait-headline-card"
+        style={{
+          position: 'absolute',
+          bottom: '24px',
+          left: 'clamp(48px, 11vw, 84px)',
+          right: '80px',
+          zIndex: 4,
+          color: '#FFFFFF',
+          textShadow: '0 4px 18px rgba(0, 0, 0, 0.7)'
+        }}
+      >
         <h2
           className="glow-hover-text"
           style={{
-            fontSize: 'clamp(26px, 3.5vw, 38px)',
+            fontSize: 'clamp(22px, 3.2vw, 34px)',
             fontWeight: 800,
             color: '#FFFFFF',
-            lineHeight: 1.05,
+            lineHeight: 1.08,
             textTransform: 'uppercase',
-            letterSpacing: '-0.03em'
+            letterSpacing: '-0.02em',
+            margin: 0
           }}
         >
           Reveal Your <br />
           <span style={{ color: '#FCD8E3', fontStyle: 'italic', textShadow: '0 0 25px rgba(226, 130, 159, 0.9)' }}>
-            Glow ✦
+            Radiant Glow ✦
           </span>
         </h2>
-        <p style={{ fontSize: '13px', opacity: 0.95, marginTop: '8px', maxWidth: '240px', lineHeight: 1.45 }}>
-          Hydrate, restore, and illuminate your skin with active bio-botanicals.
+        <p
+          style={{
+            fontSize: '12px',
+            opacity: 0.92,
+            marginTop: '6px',
+            maxWidth: '260px',
+            lineHeight: 1.4,
+            marginBottom: '10px'
+          }}
+        >
+          Hydrate, restore, and illuminate with pure bio-botanicals.
         </p>
-      </div>
 
-      {/* Floating 3D Micro-Badge on Model */}
-      <div
-        className="floating-badge-1"
-        style={{
-          position: 'absolute',
-          bottom: '80px',
-          left: 'clamp(58px, 14vw, 100px)',
-          zIndex: 4,
-          background: 'rgba(18, 18, 18, 0.78)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255, 255, 255, 0.22)',
-          padding: '6px 14px',
-          borderRadius: '9999px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          color: '#FFFFFF',
-          fontSize: '11px',
-          fontWeight: 700,
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)'
-        }}
-      >
-        <Droplets style={{ width: '13px', height: '13px', color: '#E2829F' }} />
-        <span>72-Hour Cellular Hydration</span>
+        {/* Floating 3D Micro-Badge */}
+        <div
+          className="floating-badge-1"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: 'rgba(226, 130, 159, 0.25)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            padding: '5px 12px',
+            borderRadius: '9999px',
+            color: '#FFFFFF',
+            fontSize: '10.5px',
+            fontWeight: 700,
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.35)'
+          }}
+        >
+          <Droplets style={{ width: '12px', height: '12px', color: '#FFD700' }} />
+          <span>72-Hour Cellular Hydration</span>
+        </div>
       </div>
 
       {/* Interactive Radiance Hotspots */}

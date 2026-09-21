@@ -18,15 +18,15 @@ export default function HeroSection({ onShopNowClick }) {
       id: 'forehead',
       title: 'Dewy Glass Sheen',
       desc: 'Infused with pure bio-active ceramides & rose water for light-reflecting radiance.',
-      top: '30%',
-      left: '55%'
+      top: '25%',
+      left: '60%'
     },
     {
       id: 'temple',
       title: 'Smooth Cellular Barrier',
       desc: 'Clinically repairs microscopic dryness & environmental oxidative damage.',
-      top: '36%',
-      left: '68%'
+      top: '32%',
+      left: '78%'
     }
   ];
 
