@@ -15,18 +15,18 @@ export default function HeroSection({ onShopNowClick }) {
 
   const hotspots = [
     {
-      id: 'forehead',
+      id: 'barrier',
       title: 'Dewy Glass Sheen',
       desc: 'Infused with pure bio-active ceramides & rose water for light-reflecting radiance.',
-      top: '25%',
-      left: '60%'
+      top: '62%',
+      left: '36%'
     },
     {
-      id: 'temple',
-      title: 'Smooth Cellular Barrier',
-      desc: 'Clinically repairs microscopic dryness & environmental oxidative damage.',
-      top: '32%',
-      left: '78%'
+      id: 'hydration',
+      title: '72h Active Hydration',
+      desc: 'Hyaluronic acid locks deep moisture without clogging pores.',
+      top: '70%',
+      left: '68%'
     }
   ];
 
