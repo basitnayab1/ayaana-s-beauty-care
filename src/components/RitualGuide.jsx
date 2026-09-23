@@ -18,11 +18,11 @@ export default function RitualGuide() {
     {
       number: "02",
       title: "Tone & Brighten",
-      subtitle: "Herbal Whitening Radiance Toner",
-      desc: "Micro-droplets of pure distilled rose hydrosol and 5% niacinamide restore optimal pH and tighten pores.",
+      subtitle: "Whitening Toner",
+      desc: "Refreshes, hydrates, and brightens your skin for a healthy glow. Leaves your face feeling smooth, fresh, and radiant.",
       time: "Morning & Night",
-      productId: "herbal-whitening-radiance-toner",
-      image: "/assets/radiance_toner.jpg"
+      productId: "whitening-toner",
+      image: "/assets/whitening_toner.png"
     },
     {
       number: "03",

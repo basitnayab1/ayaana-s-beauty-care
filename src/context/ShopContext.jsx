@@ -10,9 +10,11 @@ export function ShopProvider({ children }) {
     if (!saved) return PRODUCTS;
     try {
       const parsed = JSON.parse(saved);
-      const existingIds = new Set(parsed.map((p) => p.id));
+      // Clean up deprecated placeholder toner if present
+      const cleaned = parsed.filter((p) => p.id !== 'herbal-whitening-radiance-toner');
+      const existingIds = new Set(cleaned.map((p) => p.id));
       const missingFromOfficial = PRODUCTS.filter((p) => !existingIds.has(p.id));
-      return [...missingFromOfficial, ...parsed];
+      return [...missingFromOfficial, ...cleaned];
     } catch {
       return PRODUCTS;
     }

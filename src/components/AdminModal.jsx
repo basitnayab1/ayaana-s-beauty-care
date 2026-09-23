@@ -590,6 +590,8 @@ export default function AdminModal() {
                       style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(18,18,18,0.15)', fontSize: '13px', outline: 'none', backgroundColor: '#FFFFFF' }}
                     >
                       <option value="/assets/hero_cream.jpg">Luxury Cream Jar (Studio)</option>
+                      <option value="/assets/whitening_toner.png">Whitening Toner Bottles</option>
+                      <option value="/assets/natural_glow_mask.jpg">Natural Glow Mask Jar</option>
                       <option value="/assets/radiance_toner.jpg">Radiance Toner Bottle</option>
                       <option value="/assets/gold_serum.jpg">24K Gold Dropper Serum</option>
                       <option value="/assets/hand_cream.jpg">Hand & Foot Cream Jar</option>
