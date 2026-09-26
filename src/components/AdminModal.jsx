@@ -52,6 +52,7 @@ export default function AdminModal() {
     addNewProduct,
     updateProduct,
     deleteProduct,
+    resetProductsToDefault,
     moveProductToFirst,
     moveProduct,
     reorderProducts,
@@ -634,14 +635,38 @@ export default function AdminModal() {
                       />
                     </div>
 
-                    <button
-                      onClick={() => setActiveTab('add-product')}
-                      className="btn-primary"
-                      style={{ padding: '8px 16px', fontSize: '12.5px' }}
-                    >
-                      <Plus style={{ width: '14px', height: '14px' }} />
-                      <span>Add New Product</span>
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm("Reset catalog to official default products? Any deleted original products will be restored.")) {
+                            resetProductsToDefault();
+                          }
+                        }}
+                        style={{
+                          padding: '8px 13px',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          borderRadius: '8px',
+                          border: '1px solid rgba(18,18,18,0.15)',
+                          background: '#FFFFFF',
+                          color: '#736C65',
+                          cursor: 'pointer'
+                        }}
+                        title="Restore all official default products"
+                      >
+                        Reset Defaults
+                      </button>
+
+                      <button
+                        onClick={() => setActiveTab('add-product')}
+                        className="btn-primary"
+                        style={{ padding: '8px 16px', fontSize: '12.5px' }}
+                      >
+                        <Plus style={{ width: '14px', height: '14px' }} />
+                        <span>Add New Product</span>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Products Table with Drag & Drop Reordering */}
@@ -832,12 +857,23 @@ export default function AdminModal() {
                               <button
                                 type="button"
                                 onClick={() => {
-                                  if (confirm(`Are you sure you want to delete "${p.name}"?`)) {
+                                  if (confirm(`Are you sure you want to permanently delete "${p.name}"?\n\nThis product will be removed completely from your store and will not reappear.`)) {
                                     deleteProduct(p.id);
                                   }
                                 }}
-                                style={{ background: 'none', border: 'none', color: '#9B948C', cursor: 'pointer', padding: '5px' }}
-                                title="Delete product"
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#C53030',
+                                  cursor: 'pointer',
+                                  padding: '5px 7px',
+                                  borderRadius: '6px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  transition: 'background 0.2s'
+                                }}
+                                title="Delete product permanently"
                               >
                                 <Trash2 style={{ width: '15px', height: '15px' }} />
                               </button>

@@ -1,22 +1,58 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { PRODUCTS, BRAND_CONFIG } from '../data/products';
+import { supabaseQuery } from '../lib/supabase';
 
 const ShopContext = createContext();
 
+const DELETED_PRODUCTS_KEY = 'ayaana_deleted_product_ids';
+
+export function getDeletedProductIds() {
+  try {
+    const raw = localStorage.getItem(DELETED_PRODUCTS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+export function saveDeletedProductIds(setOrArray) {
+  try {
+    const arr = Array.from(setOrArray);
+    localStorage.setItem(DELETED_PRODUCTS_KEY, JSON.stringify(arr));
+  } catch (e) {
+    console.error("Failed to save deleted product IDs:", e);
+  }
+}
+
 export function ShopProvider({ children }) {
-  // Products state (auto-merges new official products & preserves admin changes)
+  // Products state (preserves admin additions, edits, order & permanently removes deleted items)
   const [products, setProducts] = useState(() => {
+    const deletedIds = getDeletedProductIds();
     const saved = localStorage.getItem('ayaana_products');
-    if (!saved) return PRODUCTS;
+
+    if (!saved) {
+      return PRODUCTS.filter((p) => !deletedIds.has(p.id));
+    }
+
     try {
       const parsed = JSON.parse(saved);
-      // Clean up deprecated placeholder toner & placeholder radiance cream if present
-      const cleaned = parsed.filter((p) => p.id !== 'herbal-whitening-radiance-toner' && p.id !== 'radiance-skin-repair-cream');
+      // Clean up deprecated placeholder toner & placeholder radiance cream if present, AND any deleted IDs
+      const cleaned = parsed.filter(
+        (p) =>
+          p.id !== 'herbal-whitening-radiance-toner' &&
+          p.id !== 'radiance-skin-repair-cream' &&
+          !deletedIds.has(p.id)
+      );
+
+      // Only import new official products if they were NEVER deleted by the admin
       const existingIds = new Set(cleaned.map((p) => p.id));
-      const missingFromOfficial = PRODUCTS.filter((p) => !existingIds.has(p.id));
-      return [...missingFromOfficial, ...cleaned];
+      const missingFromOfficial = PRODUCTS.filter(
+        (p) => !existingIds.has(p.id) && !deletedIds.has(p.id)
+      );
+
+      return [...cleaned, ...missingFromOfficial];
     } catch {
-      return PRODUCTS;
+      return PRODUCTS.filter((p) => !deletedIds.has(p.id));
     }
   });
 
@@ -396,6 +432,13 @@ export function ShopProvider({ children }) {
       stock: Number(newProd.stock) || 50
     };
 
+    // If the added product was previously in the deleted products register, remove it
+    const deletedSet = getDeletedProductIds();
+    if (deletedSet.has(productToAdd.id)) {
+      deletedSet.delete(productToAdd.id);
+      saveDeletedProductIds(deletedSet);
+    }
+
     setProducts((prev) => [productToAdd, ...prev]);
     return productToAdd;
   };
@@ -427,7 +470,54 @@ export function ShopProvider({ children }) {
   };
 
   const deleteProduct = (productId) => {
-    setProducts((prev) => prev.filter((p) => p.id !== productId));
+    if (!productId) return;
+
+    // 1. Permanently register in deleted products list so it NEVER auto-restores on page reload
+    const deletedSet = getDeletedProductIds();
+    deletedSet.add(productId);
+    saveDeletedProductIds(deletedSet);
+
+    // 2. Remove product from products state & immediately sync to localStorage
+    setProducts((prev) => {
+      const updated = prev.filter((p) => p.id !== productId);
+      localStorage.setItem('ayaana_products', JSON.stringify(updated));
+      return updated;
+    });
+
+    // 3. Clear activeProduct modal if this product was open
+    setActiveProduct((current) => (current?.id === productId ? null : current));
+
+    // 4. Remove from Cart
+    setCart((prev) => {
+      const updatedCart = prev.filter((item) => item.id !== productId);
+      localStorage.setItem('ayaana_cart', JSON.stringify(updatedCart));
+      return updatedCart;
+    });
+
+    // 5. Remove from Wishlist
+    setWishlist((prev) => {
+      const updatedWishlist = prev.filter((item) => item.id !== productId);
+      localStorage.setItem('ayaana_wishlist', JSON.stringify(updatedWishlist));
+      return updatedWishlist;
+    });
+
+    // 6. Clean up site customization pointers
+    setHeroSettings((prev) => (prev.heroProductId === productId ? { ...prev, heroProductId: null } : prev));
+    setTransformationModel((prev) => (prev.productId === productId ? { ...prev, productId: null } : prev));
+    setPortraitProductIds((prev) => prev.filter((id) => id !== productId));
+
+    // 7. Background delete from Supabase cloud database if connected
+    try {
+      supabaseQuery(`products?id=eq.${productId}`, { method: 'DELETE' }).catch(() => {});
+    } catch {
+      // Ignore background cloud sync error if offline or not configured
+    }
+  };
+
+  const resetProductsToDefault = () => {
+    localStorage.removeItem(DELETED_PRODUCTS_KEY);
+    localStorage.setItem('ayaana_products', JSON.stringify(PRODUCTS));
+    setProducts(PRODUCTS);
   };
 
   const reorderProducts = (reorderedList) => {
@@ -664,6 +754,7 @@ export function ShopProvider({ children }) {
         setProducts,
         addNewProduct,
         deleteProduct,
+        resetProductsToDefault,
         cart,
         addToCart,
         removeFromCart,
