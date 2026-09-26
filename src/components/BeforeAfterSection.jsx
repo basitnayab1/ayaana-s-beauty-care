@@ -10,7 +10,8 @@ export default function BeforeAfterSection() {
   const MODEL_TYPE_NAMES = {
     'hand-feet-cream': 'Hand and Feet Whitening Cream',
     'face-whitening-cream': 'Face Whitening Cream',
-    'toner': 'Herbal Whitening Radiance Toner'
+    'toner': 'Herbal Whitening Radiance Toner',
+    'natural-glow-mask': 'Natural Glow Mask'
   };
   const transModelProductName = MODEL_TYPE_NAMES[transformationModel?.modelType] || 'Hand and Feet Whitening Cream';
   const transLinkedProduct = transformationModel?.productId

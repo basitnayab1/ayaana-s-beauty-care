@@ -1524,11 +1524,19 @@ CREATE TABLE public.orders (
                             updateHeroSettings({ heroProductId: e.target.value || null });
                             setCustomizeSuccessMsg('Hero product updated!');
                             const newProdId = e.target.value || null;
-                            let autoModel = heroSettings?.heroModelType || 'hand-feet-cream';
-                            if (newProdId === 'natural-glow-mask') autoModel = 'natural-glow-mask';
-                            else if (newProdId === 'whitening-toner') autoModel = 'toner';
-                            else if (newProdId === 'face-whitening-cream') autoModel = 'face-whitening-cream';
-                            else if (newProdId === 'hand-and-feet-whitening-cream') autoModel = 'hand-feet-cream';
+                            const selectedProd = products.find(p => p.id === newProdId);
+                            const prodName = (selectedProd?.name || '').toLowerCase();
+
+                            let autoModel = 'hand-feet-cream';
+                            if (newProdId === 'natural-glow-mask' || newProdId?.includes('mask') || prodName.includes('mask')) {
+                              autoModel = 'natural-glow-mask';
+                            } else if (newProdId === 'whitening-toner' || newProdId?.includes('toner') || prodName.includes('toner')) {
+                              autoModel = 'toner';
+                            } else if (newProdId === 'face-whitening-cream' || prodName.includes('face')) {
+                              autoModel = 'face-whitening-cream';
+                            } else if (newProdId === 'hand-and-feet-whitening-cream' || prodName.includes('hand') || prodName.includes('feet')) {
+                              autoModel = 'hand-feet-cream';
+                            }
 
                             updateHeroSettings({ heroProductId: newProdId, heroModelType: autoModel });
                             setCustomizeSuccessMsg('Hero product & 3D model updated!');

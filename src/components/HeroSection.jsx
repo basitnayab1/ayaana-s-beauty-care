@@ -22,6 +22,33 @@ export default function HeroSection({ onShopNowClick }) {
     ? (products.find((p) => p.id === heroSettings.heroProductId) || products.find((p) => p.isHero) || products[0])
     : (products.find((p) => p.isHero) || products[0]);
 
+  // Determine effective 3D model based on heroSettings and current heroProduct
+  const getHeroModelType = () => {
+    const explicit = heroSettings?.heroModelType;
+    const prodId = heroProduct?.id || '';
+    const prodName = (heroProduct?.name || '').toLowerCase();
+
+    // 1. Explicitly configured model type
+    if (explicit === 'natural-glow-mask') return 'natural-glow-mask';
+    if (explicit === 'toner') return 'toner';
+    if (explicit === 'face-whitening-cream') return 'face-whitening-cream';
+
+    // 2. Intelligent derivation based on current hero product
+    if (prodId === 'natural-glow-mask' || prodName.includes('mask')) {
+      return 'natural-glow-mask';
+    }
+    if (prodId === 'whitening-toner' || prodName.includes('toner')) {
+      return 'toner';
+    }
+    if (prodId === 'face-whitening-cream' || (prodName.includes('face') && !prodName.includes('hand'))) {
+      return 'face-whitening-cream';
+    }
+
+    return explicit === 'hand-feet-cream' ? 'hand-feet-cream' : 'hand-feet-cream';
+  };
+
+  const activeModelType = getHeroModelType();
+
   const badge1 = heroSettings?.heroBadge1 || '✦ 100% Herbal Brightening';
   const badge2 = heroSettings?.heroBadge2 || '✦ Deep Velvet Moisture';
 
@@ -195,13 +222,17 @@ export default function HeroSection({ onShopNowClick }) {
               </div>
             </div>
 
-            {/* 3D Interactive Three.js Product Canvas (Admin selectable 3D model) */}
+            {/* 3D Interactive Three.js Product Canvas (Dynamic matching active product) */}
             <div style={{ position: 'relative', width: '100%', margin: '4px 0', zIndex: 1 }}>
-              {heroSettings?.heroModelType === 'face-whitening-cream' ? (
+              {activeModelType === 'natural-glow-mask' ? (
+                <div style={{ height: '360px', width: '100%' }}>
+                  <ThreeProductViewer productName="Natural Glow Mask" />
+                </div>
+              ) : activeModelType === 'face-whitening-cream' ? (
                 <div style={{ height: '360px', width: '100%' }}>
                   <ThreeProductViewer productName="Face Whitening Cream" />
                 </div>
-              ) : heroSettings?.heroModelType === 'toner' ? (
+              ) : activeModelType === 'toner' ? (
                 <div style={{ height: '360px', width: '100%' }}>
                   <ThreeProductViewer productName="Herbal Whitening Radiance Toner" />
                 </div>

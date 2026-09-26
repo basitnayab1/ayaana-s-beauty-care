@@ -110,7 +110,7 @@ export function ShopProvider({ children }) {
     if (saved) { try { return JSON.parse(saved); } catch {} }
     return {
       heroProductId: null,      // null = use isHero flag or products[0]
-      heroModelType: 'hand-feet-cream', // 'hand-feet-cream' | 'face-whitening-cream' | 'toner'
+      heroModelType: 'hand-feet-cream', // 'hand-feet-cream' | 'face-whitening-cream' | 'toner' | 'natural-glow-mask'
       heroBadge1: '✦ 100% Herbal Brightening',
       heroBadge2: '✦ Deep Velvet Moisture'
     };
