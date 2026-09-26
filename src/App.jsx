@@ -15,9 +15,10 @@ import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import WishlistDrawer from './components/WishlistDrawer';
 import ProductModal from './components/ProductModal';
+import ModelRoutineModal from './components/ModelRoutineModal';
 import CustomCursor from './components/CustomCursor';
 import ThreeBackground from './components/ThreeBackground';
-import { MessageCircle, Sparkles } from 'lucide-react';
+import { MessageCircle, Sparkles, GripVertical } from 'lucide-react';
 import { BRAND_CONFIG } from './data/products';
 
 // Code-split heavy modals to keep initial bundle ultra light on mobile
@@ -27,8 +28,10 @@ const AdminModal = React.lazy(() => import('./components/AdminModal'));
 
 
 function MainStore() {
-  const { products } = useShop();
+  const { products, isAdminLoggedIn, moveProduct } = useShop();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [draggedId, setDraggedId] = useState(null);
+  const [dragOverId, setDragOverId] = useState(null);
 
   const catalogRef = useRef(null);
 
@@ -112,7 +115,35 @@ function MainStore() {
               onSelectCategory={setSelectedCategory}
             />
 
-            {/* Products Grid with 3D Tilt Cards */}
+            {/* Owner Drag & Drop Reorder Notice */}
+            {isAdminLoggedIn && (
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, rgba(226, 130, 159, 0.12), rgba(18, 18, 18, 0.04))',
+                  border: '1.5px dashed #C75678',
+                  borderRadius: '16px',
+                  padding: '12px 20px',
+                  marginBottom: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '10px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <GripVertical style={{ width: '18px', height: '18px', color: '#C75678' }} />
+                  <span style={{ fontSize: '13px', fontWeight: 700, color: '#121212' }}>
+                    Owner Mode: Kisi bhi product ko drag kr k apni pasandeeda position pr rakhein! #1 product pehle show hogi.
+                  </span>
+                </div>
+                <span style={{ fontSize: '11px', background: '#FFFFFF', padding: '4px 10px', borderRadius: '6px', fontWeight: 800, color: '#C75678', border: '1px solid rgba(199, 86, 120, 0.2)' }}>
+                  ✨ Drag to Reorder Active
+                </span>
+              </div>
+            )}
+
+            {/* Products Grid with 3D Tilt Cards and Drag & Drop */}
             <div
               style={{
                 display: 'grid',
@@ -120,9 +151,81 @@ function MainStore() {
                 gap: '24px'
               }}
             >
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              {filteredProducts.map((product) => {
+                const productGlobalIndex = products.findIndex((p) => p.id === product.id);
+                const isFirst = productGlobalIndex === 0;
+
+                return (
+                  <div
+                    key={product.id}
+                    draggable={isAdminLoggedIn}
+                    onDragStart={(e) => {
+                      if (!isAdminLoggedIn) return;
+                      e.dataTransfer.setData('text/plain', product.id);
+                      e.dataTransfer.effectAllowed = 'move';
+                      setDraggedId(product.id);
+                    }}
+                    onDragOver={(e) => {
+                      if (!isAdminLoggedIn) return;
+                      e.preventDefault();
+                      if (dragOverId !== product.id) setDragOverId(product.id);
+                    }}
+                    onDragLeave={() => {
+                      if (dragOverId === product.id) setDragOverId(null);
+                    }}
+                    onDrop={(e) => {
+                      if (!isAdminLoggedIn) return;
+                      e.preventDefault();
+                      const sourceId = e.dataTransfer.getData('text/plain') || draggedId;
+                      if (sourceId && sourceId !== product.id) {
+                        const fromIdx = products.findIndex((p) => p.id === sourceId);
+                        const toIdx = products.findIndex((p) => p.id === product.id);
+                        if (fromIdx !== -1 && toIdx !== -1) {
+                          moveProduct(fromIdx, toIdx);
+                        }
+                      }
+                      setDraggedId(null);
+                      setDragOverId(null);
+                    }}
+                    style={{
+                      position: 'relative',
+                      cursor: isAdminLoggedIn ? 'grab' : 'default',
+                      transition: 'transform 0.2s ease, opacity 0.2s ease',
+                      opacity: draggedId === product.id ? 0.45 : 1,
+                      transform: dragOverId === product.id ? 'scale(1.03)' : 'none',
+                      borderRadius: '24px',
+                      boxShadow: dragOverId === product.id ? '0 0 0 2.5px #C75678, 0 12px 24px rgba(199, 86, 120, 0.2)' : 'none'
+                    }}
+                  >
+                    {isAdminLoggedIn && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: '12px',
+                          left: '12px',
+                          zIndex: 25,
+                          background: isFirst ? '#128C7E' : 'rgba(18, 18, 18, 0.88)',
+                          color: '#FFFFFF',
+                          backdropFilter: 'blur(6px)',
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          fontWeight: 800,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          pointerEvents: 'none',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                        }}
+                      >
+                        <GripVertical style={{ width: '12px', height: '12px' }} />
+                        <span>#{productGlobalIndex + 1} {isFirst ? '★ 1st' : ''}</span>
+                      </div>
+                    )}
+                    <ProductCard product={product} />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -181,6 +284,7 @@ function MainStore() {
       <CartDrawer />
       <WishlistDrawer />
       <ProductModal />
+      <ModelRoutineModal />
       <React.Suspense fallback={null}>
         <CheckoutModal />
         <OrderTrackingModal />

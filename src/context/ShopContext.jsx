@@ -10,8 +10,8 @@ export function ShopProvider({ children }) {
     if (!saved) return PRODUCTS;
     try {
       const parsed = JSON.parse(saved);
-      // Clean up deprecated placeholder toner if present
-      const cleaned = parsed.filter((p) => p.id !== 'herbal-whitening-radiance-toner');
+      // Clean up deprecated placeholder toner & placeholder radiance cream if present
+      const cleaned = parsed.filter((p) => p.id !== 'herbal-whitening-radiance-toner' && p.id !== 'radiance-skin-repair-cream');
       const existingIds = new Set(cleaned.map((p) => p.id));
       const missingFromOfficial = PRODUCTS.filter((p) => !existingIds.has(p.id));
       return [...missingFromOfficial, ...cleaned];
@@ -47,12 +47,141 @@ export function ShopProvider({ children }) {
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get('admin') === 'true';
+    } catch {
+      return false;
+    }
+  });
 
-  // Admin authentication state
+  useEffect(() => {
+    window.__openAdmin = () => setIsAdminOpen(true);
+  }, []);
+
+  // Auto-migrate activeProduct if currently viewing deprecated radiance-skin-repair-cream
+  useEffect(() => {
+    if (activeProduct && activeProduct.id === 'radiance-skin-repair-cream') {
+      const faceCream = products.find(p => p.id === 'face-whitening-cream');
+      if (faceCream) setActiveProduct(faceCream);
+    }
+  }, [activeProduct, products]);
+
+  // ── Site Customization State ──────────────────────────────────────────────────
+  // Hero Section settings
+  const [heroSettings, setHeroSettings] = useState(() => {
+    const saved = localStorage.getItem('ayaana_hero_settings');
+    if (saved) { try { return JSON.parse(saved); } catch {} }
+    return {
+      heroProductId: null,      // null = use isHero flag or products[0]
+      heroModelType: 'hand-feet-cream', // 'hand-feet-cream' | 'face-whitening-cream' | 'toner'
+      heroBadge1: '✦ 100% Herbal Brightening',
+      heroBadge2: '✦ Deep Velvet Moisture'
+    };
+  });
+
+  // Transformation section 3D model
+  const [transformationModel, setTransformationModel] = useState(() => {
+    const saved = localStorage.getItem('ayaana_transformation_model');
+    if (saved) { try { return JSON.parse(saved); } catch {} }
+    return {
+      modelType: 'hand-feet-cream', // 'hand-feet-cream' | 'face-whitening-cream' | 'toner'
+      productId: null               // which product's price/name to show alongside
+    };
+  });
+
+  // Admin-managed reviews
+  const DEFAULT_REVIEWS = [
+    { id: 1, name: 'Sania Tariq', city: 'Lahore', product: 'Hand & Foot Complex + Skin Repair Cream', rating: 5, date: '3 days ago', text: 'Se boht zyada bright howy n 😊 Mai apko before and after ke picture bi send krti hu abi 🤗 Mere dark knuckles par koi cream asar nahi kar rahi thi, Ayaana\'s ke 1 week use ke baad difference clear hai!', verified: true },
+    { id: 2, name: 'Dr. Fatima Zahra', city: 'Islamabad', product: 'Radiance Skin Repair Cream', rating: 5, date: '1 week ago', text: 'As a physician, I check ingredient lists very strictly. The balance of 5% niacinamide with pure bio-ceramides is formulated to international dermatology standards. My dry winter skin has completely healed.', verified: true },
+    { id: 3, name: 'Areeba Khan', city: 'Karachi', product: '24K Gold Radiance Glow Serum', rating: 5, date: '2 weeks ago', text: 'The gold serum gives an unbelievable glass-skin dewy finish under makeup! Not sticky at all, it absorbs in 30 seconds and gives this ethereal lit-from-within glow.', verified: true },
+    { id: 4, name: 'Hira Mansoor', city: 'Faisalabad', product: 'Herbal Whitening & Radiance Toner', rating: 5, date: '2 weeks ago', text: 'The natural rose hydrosol smell is divine. My enlarged pores around the nose area tightened up so fast. Best toner I have ever used in Pakistan.', verified: true },
+    { id: 5, name: 'Zainab Mir', city: 'Dubai, UAE', product: 'Complete Radiance Bundle', rating: 5, date: '3 weeks ago', text: 'Ordered the full collection to Dubai and it arrived via DHL safely packed with luxury gift ribbon. The packaging looks so high end, exactly like French luxury cosmetic brands.', verified: true },
+    { id: 6, name: 'Mahnoor Bilal', city: 'Rawalpindi', product: 'Miracle Glow Night Balm', rating: 5, date: '1 month ago', text: 'Waking up with zero dullness is real! My skin feels super soft and plump every morning. Ayaana is also very responsive on WhatsApp for advice.', verified: true }
+  ];
+
+  const [siteReviews, setSiteReviews] = useState(() => {
+    const saved = localStorage.getItem('ayaana_reviews');
+    if (saved) { try { return JSON.parse(saved); } catch {} }
+    return DEFAULT_REVIEWS;
+  });
+
+  // Girl's Image / Living Model Routine Products
+  const [portraitProductIds, setPortraitProductIds] = useState(() => {
+    const saved = localStorage.getItem('ayaana_portrait_products');
+    if (saved) { try { return JSON.parse(saved); } catch {} }
+    return ['face-whitening-cream', 'herbal-whitening-toner'];
+  });
+  const [isPortraitModalOpen, setIsPortraitModalOpen] = useState(false);
+
+  // Persist customization state
+  useEffect(() => { localStorage.setItem('ayaana_hero_settings', JSON.stringify(heroSettings)); }, [heroSettings]);
+  useEffect(() => { localStorage.setItem('ayaana_transformation_model', JSON.stringify(transformationModel)); }, [transformationModel]);
+  useEffect(() => { localStorage.setItem('ayaana_reviews', JSON.stringify(siteReviews)); }, [siteReviews]);
+  useEffect(() => { localStorage.setItem('ayaana_portrait_products', JSON.stringify(portraitProductIds)); }, [portraitProductIds]);
+
+  const updateHeroSettings = (updates) => setHeroSettings(prev => ({ ...prev, ...updates }));
+  const updateTransformationModel = (updates) => setTransformationModel(prev => ({ ...prev, ...updates }));
+  const updatePortraitProductIds = (ids) => setPortraitProductIds(ids);
+  const addReview = (review) => {
+    const newReview = { ...review, id: Date.now(), verified: true };
+    setSiteReviews(prev => [newReview, ...prev]);
+    return newReview;
+  };
+  const deleteReview = (reviewId) => setSiteReviews(prev => prev.filter(r => r.id !== reviewId));
+  const updateReview = (reviewId, updates) => setSiteReviews(prev => prev.map(r => r.id === reviewId ? { ...r, ...updates } : r));
+
+  // Multiple Admin Management State
+  const [adminsList, setAdminsList] = useState(() => {
+    const defaultAdmins = [
+      {
+        id: 'admin-super-basit',
+        name: 'Basit Nayab',
+        email: 'basitmalix01@gmail.com',
+        password: 'Muhana5424@.',
+        role: 'Super Admin',
+        createdAt: '2026-09-26'
+      },
+      {
+        id: 'admin-syeda',
+        name: 'Syeda Ayaana',
+        email: 'admin@ayaanas.com',
+        password: 'ayaana123',
+        role: 'Store Manager',
+        createdAt: '2026-09-01'
+      }
+    ];
+
+    const saved = localStorage.getItem('ayaana_admins_list');
+    if (!saved) return defaultAdmins;
+    try {
+      const parsed = JSON.parse(saved);
+      // Ensure the user's primary Super Admin is always present
+      if (!parsed.some((a) => a.email.toLowerCase() === 'basitmalix01@gmail.com')) {
+        parsed.unshift(defaultAdmins[0]);
+      }
+      return parsed;
+    } catch {
+      return defaultAdmins;
+    }
+  });
+
+  const [currentAdminUser, setCurrentAdminUser] = useState(() => {
+    const saved = localStorage.getItem('ayaana_current_admin');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* ignore */ }
+    }
+    return {
+      id: 'admin-super-basit',
+      name: 'Basit Nayab',
+      email: 'basitmalix01@gmail.com',
+      role: 'Super Admin'
+    };
+  });
+
   const [adminCredentials, setAdminCredentials] = useState(() => {
     const saved = localStorage.getItem('ayaana_admin_creds');
-    return saved ? JSON.parse(saved) : { email: "admin@ayaanas.com", password: "ayaana123" };
+    return saved ? JSON.parse(saved) : { email: "basitmalix01@gmail.com", password: "Muhana5424@." };
   });
 
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
@@ -105,6 +234,14 @@ export function ShopProvider({ children }) {
   }, [recentOrders]);
 
   useEffect(() => {
+    localStorage.setItem('ayaana_admins_list', JSON.stringify(adminsList));
+  }, [adminsList]);
+
+  useEffect(() => {
+    localStorage.setItem('ayaana_current_admin', JSON.stringify(currentAdminUser));
+  }, [currentAdminUser]);
+
+  useEffect(() => {
     localStorage.setItem('ayaana_admin_creds', JSON.stringify(adminCredentials));
   }, [adminCredentials]);
 
@@ -115,7 +252,7 @@ export function ShopProvider({ children }) {
   // Lock background body scroll when any modal or drawer is active
   useEffect(() => {
     const isAnyModalOpen = Boolean(
-      activeProduct || isCartOpen || isWishlistOpen || isCheckoutOpen || isTrackingOpen || isAdminOpen
+      activeProduct || isCartOpen || isWishlistOpen || isCheckoutOpen || isTrackingOpen || isAdminOpen || isPortraitModalOpen
     );
     if (isAnyModalOpen) {
       const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
@@ -136,29 +273,104 @@ export function ShopProvider({ children }) {
   // Admin Auth Methods
   const adminLogin = (emailOrUser, password) => {
     const inputClean = (emailOrUser || '').trim().toLowerCase();
-    const credEmail = (adminCredentials.email || '').toLowerCase();
-    if (
-      (inputClean === credEmail || inputClean === 'admin' || inputClean === 'ayaana') &&
-      password === adminCredentials.password
-    ) {
+    const passInput = (password || '').trim();
+
+    // Check against all registered admins
+    const matchedAdmin = adminsList.find((admin) => {
+      const admEmail = admin.email.toLowerCase();
+      const admUsername = admEmail.split('@')[0];
+      const matchIdentity = inputClean === admEmail || inputClean === admUsername || (inputClean === 'ayaana' && admEmail === 'admin@ayaanas.com');
+      return matchIdentity && admin.password === passInput;
+    });
+
+    if (matchedAdmin) {
       setIsAdminLoggedIn(true);
-      return { success: true };
+      setCurrentAdminUser(matchedAdmin);
+      setAdminCredentials({ email: matchedAdmin.email, password: matchedAdmin.password });
+      return { success: true, user: matchedAdmin };
     }
-    return { success: false, message: "Invalid email or password. Default: admin@ayaanas.com / ayaana123" };
+
+    // Fallback legacy match
+    if (
+      (inputClean === 'basitmalix01@gmail.com' || inputClean === 'basit') &&
+      passInput === 'Muhana5424@.'
+    ) {
+      const superUser = {
+        id: 'admin-super-basit',
+        name: 'Basit Nayab',
+        email: 'basitmalix01@gmail.com',
+        role: 'Super Admin',
+        password: 'Muhana5424@.'
+      };
+      setIsAdminLoggedIn(true);
+      setCurrentAdminUser(superUser);
+      return { success: true, user: superUser };
+    }
+
+    return {
+      success: false,
+      message: "Invalid credentials. Use your registered email and password."
+    };
   };
 
   const adminLogout = () => {
     setIsAdminLoggedIn(false);
   };
 
-  const updateAdminPassword = (newPassword) => {
-    setAdminCredentials((prev) => ({ ...prev, password: newPassword }));
+  const addNewAdmin = (newAdmin) => {
+    if (!newAdmin.email || !newAdmin.password) {
+      return { success: false, message: "Email and password are required." };
+    }
+    const emailClean = newAdmin.email.trim().toLowerCase();
+    if (adminsList.some((a) => a.email.toLowerCase() === emailClean)) {
+      return { success: false, message: "An admin with this email already exists." };
+    }
+
+    const createdAdmin = {
+      id: `admin-${Date.now()}`,
+      name: newAdmin.name?.trim() || emailClean.split('@')[0],
+      email: emailClean,
+      password: newAdmin.password,
+      role: newAdmin.role || 'Store Manager',
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+
+    setAdminsList((prev) => [...prev, createdAdmin]);
+    return { success: true, admin: createdAdmin };
+  };
+
+  const deleteAdmin = (adminId) => {
+    if (adminsList.length <= 1) {
+      return { success: false, message: "Cannot remove the only remaining admin account." };
+    }
+    if (currentAdminUser?.id === adminId) {
+      return { success: false, message: "You cannot delete your own currently active account." };
+    }
+    setAdminsList((prev) => prev.filter((a) => a.id !== adminId));
     return { success: true };
   };
 
-  // Admin Product Management
+  const updateAdminPassword = (newPassword) => {
+    setAdminCredentials((prev) => ({ ...prev, password: newPassword }));
+    if (currentAdminUser) {
+      setAdminsList((prev) =>
+        prev.map((a) => (a.id === currentAdminUser.id ? { ...a, password: newPassword } : a))
+      );
+    }
+    return { success: true };
+  };
+
+  // Admin Product Management (Supports Multiple Pictures)
   const addNewProduct = (newProd) => {
     const id = (newProd.name || 'product').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString().slice(-4);
+    
+    // Multiple images handling
+    const imageList = Array.isArray(newProd.images) && newProd.images.filter(Boolean).length > 0
+      ? newProd.images.filter(Boolean)
+      : [newProd.image || "/assets/hero_cream.jpg"];
+
+    const primaryImage = newProd.image || imageList[0];
+
     const productToAdd = {
       id,
       name: newProd.name,
@@ -174,9 +386,10 @@ export function ShopProvider({ children }) {
       reviewsCount: 1,
       badge: newProd.badge || "New Arrival",
       isHero: false,
-      image: newProd.image || "/assets/hero_cream.jpg",
+      image: primaryImage,
+      images: imageList,
       description: newProd.description || "Crafted with pure botanicals and calibrated active brighteners for radiant daily skin renewal.",
-      howToUse: newProd.howToUse || "Apply evenly on clean face morning and evening.",
+      howToUse: newProd.howToUse || "Apply evenly on clean skin morning and evening.",
       ingredients: newProd.ingredients || "Organic Rose Water, Niacinamide, Ceramides, Herbal Extracts.",
       benefits: ["Restores skin barrier", "Promotes natural luminous glow", "Deep 72h moisture"],
       clinicalResults: "100% agreed skin felt smoother and brighter.",
@@ -187,8 +400,64 @@ export function ShopProvider({ children }) {
     return productToAdd;
   };
 
+  const updateProduct = (updatedProd) => {
+    const updatedPricePKR = Number(updatedProd.pricePKR);
+    setProducts((prev) =>
+      prev.map((item) => {
+        if (item.id === updatedProd.id) {
+          const imageList = Array.isArray(updatedProd.images) && updatedProd.images.filter(Boolean).length > 0
+            ? updatedProd.images.filter(Boolean)
+            : [updatedProd.image || item.image];
+          const primaryImage = updatedProd.image || imageList[0];
+
+          return {
+            ...item,
+            ...updatedProd,
+            image: primaryImage,
+            images: imageList,
+            pricePKR: updatedPricePKR || item.pricePKR,
+            priceUSD: Number((updatedPricePKR * 0.0036).toFixed(2)) || item.priceUSD,
+            originalPricePKR: Math.round((updatedPricePKR || item.pricePKR) * 1.2),
+            stock: Number(updatedProd.stock) !== undefined ? Number(updatedProd.stock) : item.stock
+          };
+        }
+        return item;
+      })
+    );
+  };
+
   const deleteProduct = (productId) => {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
+  };
+
+  const reorderProducts = (reorderedList) => {
+    setProducts(reorderedList);
+    localStorage.setItem('ayaana_products', JSON.stringify(reorderedList));
+  };
+
+  const moveProductToFirst = (productId) => {
+    setProducts((prev) => {
+      const idx = prev.findIndex((p) => p.id === productId);
+      if (idx <= 0) return prev;
+      const target = prev[idx];
+      const rest = prev.filter((p) => p.id !== productId);
+      const updated = [target, ...rest];
+      localStorage.setItem('ayaana_products', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const moveProduct = (fromIndex, toIndex) => {
+    setProducts((prev) => {
+      if (fromIndex < 0 || toIndex < 0 || fromIndex >= prev.length || toIndex >= prev.length) {
+        return prev;
+      }
+      const updated = [...prev];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
+      localStorage.setItem('ayaana_products', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const updateOrderStatus = (orderId, newStatus) => {
@@ -431,6 +700,14 @@ export function ShopProvider({ children }) {
         setIsCheckoutOpen,
         isTrackingOpen,
         setIsTrackingOpen,
+        adminsList,
+        addNewAdmin,
+        deleteAdmin,
+        currentAdminUser,
+        updateProduct,
+        reorderProducts,
+        moveProductToFirst,
+        moveProduct,
         isAdminOpen,
         setIsAdminOpen,
         isAdminLoggedIn,
@@ -442,7 +719,21 @@ export function ShopProvider({ children }) {
         updateOrderStatus,
         placeOrder,
         generateWhatsAppOrderUrl,
-        generateSingleProductWhatsAppUrl
+        generateSingleProductWhatsAppUrl,
+        // Site Customization
+        heroSettings,
+        updateHeroSettings,
+        transformationModel,
+        updateTransformationModel,
+        portraitProductIds,
+        setPortraitProductIds,
+        updatePortraitProductIds,
+        isPortraitModalOpen,
+        setIsPortraitModalOpen,
+        siteReviews,
+        addReview,
+        deleteReview,
+        updateReview
       }}
     >
       {children}

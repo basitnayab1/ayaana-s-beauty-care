@@ -104,7 +104,10 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      onClick={handleManualBlink}
+      onClick={() => {
+        handleManualBlink();
+        if (onQuickView) onQuickView();
+      }}
       className="living-portrait-wrapper"
       style={{
         position: 'relative',

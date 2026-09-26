@@ -1,14 +1,29 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import ThreeHeroJar from './ThreeHeroJar';
+import ThreeProductViewer from './ThreeProductViewer';
 import Tilt3DCard from './Tilt3DCard';
 import LivingModelPortrait from './LivingModelPortrait';
 import { ArrowUpRight, Sparkles, MessageCircle, Droplets } from 'lucide-react';
 import { BRAND_CONFIG } from '../data/products';
 
 export default function HeroSection({ onShopNowClick }) {
-  const { formatPrice, setActiveProduct, products } = useShop();
-  const heroProduct = products.find((p) => p.isHero) || products[0];
+  const {
+    formatPrice,
+    setActiveProduct,
+    products,
+    heroSettings,
+    portraitProductIds,
+    setIsPortraitModalOpen
+  } = useShop();
+
+  // Admin can override which product shows as hero
+  const heroProduct = heroSettings?.heroProductId
+    ? (products.find((p) => p.id === heroSettings.heroProductId) || products.find((p) => p.isHero) || products[0])
+    : (products.find((p) => p.isHero) || products[0]);
+
+  const badge1 = heroSettings?.heroBadge1 || '✦ 100% Herbal Brightening';
+  const badge2 = heroSettings?.heroBadge2 || '✦ Deep Velvet Moisture';
 
   // Active Hotspot tooltip state
   const [activeSpot, setActiveSpot] = useState(null);
@@ -96,13 +111,43 @@ export default function HeroSection({ onShopNowClick }) {
           }}
           className="hero-grid"
         >
-          {/* Card 1: 3D Living Model Portrait with interactive face tilt, head tracking, blinking eyes & luxury studio */}
-          <LivingModelPortrait
-            hotspots={hotspots}
-            activeSpot={activeSpot}
-            setActiveSpot={setActiveSpot}
-            onQuickView={() => setActiveProduct(heroProduct)}
-          />
+          {/* Card 1: 3D Living Model Portrait with interactive face tilt, head tracking, blinking eyes & routine popup */}
+          <div style={{ position: 'relative' }}>
+            <LivingModelPortrait
+              hotspots={hotspots}
+              activeSpot={activeSpot}
+              setActiveSpot={setActiveSpot}
+              onQuickView={() => setIsPortraitModalOpen(true)}
+            />
+            {/* Visual Callout: Click to shop model's products */}
+            <div
+              onClick={() => setIsPortraitModalOpen(true)}
+              style={{
+                position: 'absolute',
+                top: '18px',
+                left: '18px',
+                background: 'rgba(18, 18, 18, 0.78)',
+                backdropFilter: 'blur(12px)',
+                color: '#FFFFFF',
+                padding: '6px 14px',
+                borderRadius: '9999px',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
+                border: '1px solid rgba(226, 130, 159, 0.35)',
+                zIndex: 6,
+                transition: 'all 0.2s ease'
+              }}
+              title="Click to view all products used on model"
+            >
+              <Sparkles style={{ width: '12px', height: '12px', color: '#E2829F' }} />
+              <span>Shop Model's Routine ({(portraitProductIds || []).length} products)</span>
+            </div>
+          </div>
 
           {/* Card 2: Interactive 3D Skincare Jar Stage with Floating 3D Badges */}
           <Tilt3DCard
@@ -121,14 +166,14 @@ export default function HeroSection({ onShopNowClick }) {
               overflow: 'hidden'
             }}
           >
-            {/* Header: Pure Skin Glow -> Radiance with 3D text */}
+            {/* Header: Dynamic Admin Product */}
             <div style={{ position: 'relative', zIndex: 2 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: '11.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#736C65' }}>
-                  Signature 3D Formulation
+                  {heroProduct.categoryName ? heroProduct.categoryName.toUpperCase() : 'EXCLUSIVE FORMULA'}
                 </span>
                 <span style={{ background: '#121212', color: '#FFFFFF', fontSize: '11px', fontWeight: 800, padding: '5px 12px', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.15)' }}>
-                  50ml
+                  {heroProduct.volume || '50ml'}
                 </span>
               </div>
 
@@ -136,26 +181,33 @@ export default function HeroSection({ onShopNowClick }) {
                 <h1
                   className="glow-hover-text"
                   style={{
-                    fontSize: 'clamp(32px, 4.5vw, 46px)',
+                    fontSize: 'clamp(30px, 4.2vw, 44px)',
                     fontWeight: 800,
                     lineHeight: 1.1,
                     letterSpacing: '-0.035em'
                   }}
                 >
-                  Pure Skin <br />
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#121212' }}>
-                    Glow <span style={{ color: '#E2829F', fontSize: '0.85em' }}>→</span> <span style={{ color: '#C75678', fontStyle: 'italic', textShadow: '0 0 20px rgba(226, 130, 159, 0.4)' }}>Radiance</span>
-                  </span>
+                  {heroProduct.name}
                 </h1>
                 <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginTop: '8px', maxWidth: '360px', lineHeight: 1.5 }}>
-                  Dermatologist formulated with bio-active ceramides, pure organic roses, and clinically proven botanical brighteners.
+                  {heroProduct.description ? heroProduct.description.slice(0, 140) + '...' : heroProduct.tagline}
                 </p>
               </div>
             </div>
 
-            {/* 3D Interactive Three.js Skincare Jar Canvas */}
+            {/* 3D Interactive Three.js Product Canvas (Admin selectable 3D model) */}
             <div style={{ position: 'relative', width: '100%', margin: '4px 0', zIndex: 1 }}>
-              <ThreeHeroJar />
+              {heroSettings?.heroModelType === 'face-whitening-cream' ? (
+                <div style={{ height: '360px', width: '100%' }}>
+                  <ThreeProductViewer productName="Face Whitening Cream" />
+                </div>
+              ) : heroSettings?.heroModelType === 'toner' ? (
+                <div style={{ height: '360px', width: '100%' }}>
+                  <ThreeProductViewer productName="Herbal Whitening Radiance Toner" />
+                </div>
+              ) : (
+                <ThreeHeroJar />
+              )}
 
               {/* Floating 3D Ingredient Badges Around 3D Jar */}
               <div
@@ -176,8 +228,9 @@ export default function HeroSection({ onShopNowClick }) {
                   pointerEvents: 'none'
                 }}
               >
-                ✦ 5% Niacinamide Active
+                {badge1}
               </div>
+
 
               <div
                 className="floating-badge-2"
@@ -197,7 +250,7 @@ export default function HeroSection({ onShopNowClick }) {
                   pointerEvents: 'none'
                 }}
               >
-                ✦ Bio-Ceramide NP Shield
+                {badge2}
               </div>
             </div>
 
@@ -211,22 +264,22 @@ export default function HeroSection({ onShopNowClick }) {
                   {formatPrice(heroProduct.originalPricePKR, heroProduct.originalPriceUSD)}
                 </span>
                 <span style={{ fontSize: '11px', fontWeight: 800, color: '#C75678', background: 'var(--brand-rose-light)', padding: '3px 10px', borderRadius: '6px' }}>
-                  SAVE 16%
+                  SAVE {heroProduct.originalPricePKR ? Math.round((1 - heroProduct.pricePKR / heroProduct.originalPricePKR) * 100) : 21}%
                 </span>
               </div>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }} className="hero-cta-group">
                 <button
-                  onClick={() => onShopNowClick()}
+                  onClick={() => setActiveProduct(heroProduct)}
                   className="btn-primary"
                   style={{ flex: 1, minWidth: '150px' }}
                 >
-                  <span>Explore Collection</span>
+                  <span>Explore 3D Jar</span>
                   <ArrowUpRight style={{ width: '16px', height: '16px' }} />
                 </button>
 
                 <a
-                  href={`https://wa.me/${BRAND_CONFIG.whatsappNumber.replace('+', '')}?text=${encodeURIComponent("Hello Ayaana's! I am interested in your Radiance Skin Repair Cream. Please provide more details.")}`}
+                  href={`https://wa.me/${BRAND_CONFIG.whatsappNumber.replace('+', '')}?text=${encodeURIComponent(`Hello Ayaana's! I am interested in your ${heroProduct.name} (PKR ${heroProduct.pricePKR}). Please confirm my order.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-whatsapp"

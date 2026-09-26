@@ -24,6 +24,7 @@ export default function ProductModal() {
   const [activeTab, setActiveTab] = useState('description');
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [addedNotice, setAddedNotice] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   // 2. Synchronize state when activeProduct changes (React adjusting state pattern)
   const [prevId, setPrevId] = useState(activeProduct?.id);
@@ -33,7 +34,8 @@ export default function ProductModal() {
     setQuantity(1);
     setActiveTab('description');
     setIsDescriptionExpanded(false);
-    const has3DView = activeProduct.category === 'toners' || (activeProduct.name || '').toLowerCase().includes('toner') || activeProduct.category === 'repair-creams' || activeProduct.category === 'glow-masks';
+    setSelectedImageIndex(0);
+    const has3DView = activeProduct.has3D !== false && (activeProduct.category === 'toners' || (activeProduct.name || '').toLowerCase().includes('toner') || activeProduct.category === 'repair-creams' || activeProduct.category === 'glow-masks');
     setViewMode(has3DView ? '3d' : 'photo');
   }
 
@@ -70,7 +72,7 @@ export default function ProductModal() {
 
   const isToner = activeProduct?.category === 'toners' || (activeProduct?.name || '').toLowerCase().includes('toner');
   const isJar = activeProduct?.category === 'repair-creams' || activeProduct?.category === 'glow-masks';
-  const has3D = isToner || isJar;
+  const has3D = activeProduct?.has3D === false ? false : (isToner || isJar);
 
   return (
     <div className="overlay-backdrop modal-overlay" onClick={() => setActiveProduct(null)}>
@@ -217,7 +219,7 @@ export default function ProductModal() {
                   <ThreeProductViewer productName={activeProduct.name} />
                 ) : (
                   <img
-                    src={activeProduct.image}
+                    src={(Array.isArray(activeProduct.images) && activeProduct.images[selectedImageIndex]) || activeProduct.image}
                     alt={activeProduct.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
@@ -241,6 +243,34 @@ export default function ProductModal() {
                   {selectedVolume}
                 </span>
               </div>
+
+              {/* Multiple Images Thumbnail Strip */}
+              {Array.isArray(activeProduct.images) && activeProduct.images.length > 1 && (
+                <div style={{ display: 'flex', gap: '8px', marginTop: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+                  {activeProduct.images.map((imgUrl, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setSelectedImageIndex(idx);
+                        setViewMode('photo');
+                      }}
+                      style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        padding: 0,
+                        border: selectedImageIndex === idx && viewMode === 'photo' ? '2px solid #121212' : '1px solid var(--border-card)',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                        background: '#FFFFFF'
+                      }}
+                    >
+                      <img src={imgUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Key Assurance Indicators */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '16px' }}>

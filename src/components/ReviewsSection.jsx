@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Star, CheckCircle2, ChevronLeft, ChevronRight, Pause, Play, Sparkles, ShieldCheck, Heart } from 'lucide-react';
+import { useShop } from '../context/ShopContext';
 
 export default function ReviewsSection() {
+  const { siteReviews } = useShop();
+
   // Provided customer result images
   const customerProofImages = [
     {
@@ -85,68 +88,11 @@ export default function ReviewsSection() {
     setProgress(0);
   };
 
-  const reviews = [
-    {
-      id: 1,
-      name: "Sania Tariq",
-      city: "Lahore",
-      product: "Hand & Foot Complex + Skin Repair Cream",
-      rating: 5,
-      date: "3 days ago",
-      text: "Se boht zyada bright howy n 😊 Mai apko before and after ke picture bi send krti hu abi 🤗 Mere dark knuckles par koi cream asar nahi kar rahi thi, Ayaana's ke 1 week use ke baad difference clear hai!",
-      verified: true
-    },
-    {
-      id: 2,
-      name: "Dr. Fatima Zahra",
-      city: "Islamabad",
-      product: "Radiance Skin Repair Cream",
-      rating: 5,
-      date: "1 week ago",
-      text: "As a physician, I check ingredient lists very strictly. The balance of 5% niacinamide with pure bio-ceramides is formulated to international dermatology standards. My dry winter skin has completely healed.",
-      verified: true
-    },
-    {
-      id: 3,
-      name: "Areeba Khan",
-      city: "Karachi",
-      product: "24K Gold Radiance Glow Serum",
-      rating: 5,
-      date: "2 weeks ago",
-      text: "The gold serum gives an unbelievable glass-skin dewy finish under makeup! Not sticky at all, it absorbs in 30 seconds and gives this ethereal lit-from-within glow.",
-      verified: true
-    },
-    {
-      id: 4,
-      name: "Hira Mansoor",
-      city: "Faisalabad",
-      product: "Herbal Whitening & Radiance Toner",
-      rating: 5,
-      date: "2 weeks ago",
-      text: "The natural rose hydrosol smell is divine. My enlarged pores around the nose area tightened up so fast. Best toner I have ever used in Pakistan.",
-      verified: true
-    },
-    {
-      id: 5,
-      name: "Zainab Mir",
-      city: "Dubai, UAE",
-      product: "Complete Radiance Bundle",
-      rating: 5,
-      date: "3 weeks ago",
-      text: "Ordered the full collection to Dubai and it arrived via DHL safely packed with luxury gift ribbon. The packaging looks so high end, exactly like French luxury cosmetic brands.",
-      verified: true
-    },
-    {
-      id: 6,
-      name: "Mahnoor Bilal",
-      city: "Rawalpindi",
-      product: "Miracle Glow Night Balm",
-      rating: 5,
-      date: "1 month ago",
-      text: "Waking up with zero dullness is real! My skin feels super soft and plump every morning. Ayaana is also very responsive on WhatsApp for advice.",
-      verified: true
-    }
-  ];
+
+  // Use admin-managed reviews from context
+  const reviews = siteReviews || [];
+
+
 
   const currentImage = customerProofImages[activeImageIndex];
 

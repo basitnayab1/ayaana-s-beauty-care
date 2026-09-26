@@ -15,8 +15,8 @@ export default function ThreeHeroJar({ className = "" }) {
 
     // Scene, Camera, Renderer
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
-    camera.position.set(0, 0.5, 4.2);
+    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
+    camera.position.set(0, 0.72, 3.8);
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
@@ -36,77 +36,104 @@ export default function ThreeHeroJar({ className = "" }) {
     const jarGroup = new THREE.Group();
     scene.add(jarGroup);
 
-    // Materials
-    // 1. Brushed Rose Gold Metallic Cap
-    const capMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#E4A895'),
-      metalness: 0.88,
-      roughness: 0.22,
-      envMapIntensity: 1.5
+    // Materials & Textures
+    const textureLoader = new THREE.TextureLoader();
+    const stickerTexture = textureLoader.load('/assets/hand_cream_sticker.png');
+    stickerTexture.colorSpace = THREE.SRGBColorSpace;
+
+    // 1. Blush Pink Porcelain / Luxury Resin (matching authentic cosmetic jar)
+    const pinkPorcelainMaterial = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color('#F7D0DC'),
+      roughness: 0.18,
+      metalness: 0.04,
+      clearcoat: 0.85,
+      clearcoatRoughness: 0.12
     });
 
-    // 2. Heavy Frosted Cosmetic Glass Jar
-    const glassMaterial = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color('#FAF7F2'),
-      metalness: 0.05,
-      roughness: 0.12,
-      transmission: 0.82,
-      thickness: 1.1,
-      ior: 1.5,
-      transparent: true,
-      opacity: 0.92
+    // 2. Pure White Thread Neck
+    const whiteThreadMaterial = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#FFFFFF'),
+      roughness: 0.28,
+      metalness: 0.02
     });
 
-    // 3. Luxurious Ivory Cream Inside
+    // 3. Luxurious Whipped Ivory Whitening Cream Inside
     const creamMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#FFFDF9'),
-      roughness: 0.45,
-      metalness: 0.05
+      color: new THREE.Color('#FFFDFB'),
+      roughness: 0.38,
+      metalness: 0.02
     });
 
-    // 4. Gold Rim Accent
-    const goldRimMaterial = new THREE.MeshStandardMaterial({
-      color: new THREE.Color('#ECC79B'),
-      metalness: 0.95,
-      roughness: 0.15
+    // 4. Subtle Rose Gold Trim Accent Ring
+    const roseGoldTrimMaterial = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#E2A2B0'),
+      metalness: 0.92,
+      roughness: 0.18
+    });
+
+    // 5. Authentic Hand & Feet Circular Label Sticker
+    const stickerMaterial = new THREE.MeshStandardMaterial({
+      map: stickerTexture,
+      transparent: true,
+      roughness: 0.22,
+      metalness: 0.02
     });
 
     // Geometry Assembly
-    // Glass Body: Cylinder with rounded feel
-    const glassGeo = new THREE.CylinderGeometry(0.95, 0.92, 0.9, 48, 1);
-    const glassMesh = new THREE.Mesh(glassGeo, glassMaterial);
-    glassMesh.position.y = -0.2;
-    glassMesh.castShadow = true;
-    glassMesh.receiveShadow = true;
-    jarGroup.add(glassMesh);
+    // 1. Blush Pink Jar Body (Shallow luxury cosmetic tub)
+    const tubGeo = new THREE.CylinderGeometry(1.08, 1.05, 0.58, 64);
+    const tubMesh = new THREE.Mesh(tubGeo, pinkPorcelainMaterial);
+    tubMesh.position.y = -0.16;
+    tubMesh.castShadow = true;
+    tubMesh.receiveShadow = true;
+    jarGroup.add(tubMesh);
 
-    // Inner Cream Core
-    const creamGeo = new THREE.CylinderGeometry(0.86, 0.84, 0.78, 36);
+    // Rounded bottom edge
+    const tubBottomGeo = new THREE.CylinderGeometry(1.05, 0.98, 0.08, 64);
+    const tubBottomMesh = new THREE.Mesh(tubBottomGeo, pinkPorcelainMaterial);
+    tubBottomMesh.position.y = -0.49;
+    jarGroup.add(tubBottomMesh);
+
+    // 2. Inner Whipped Cream
+    const creamGeo = new THREE.CylinderGeometry(0.98, 0.95, 0.44, 48);
     const creamMesh = new THREE.Mesh(creamGeo, creamMaterial);
-    creamMesh.position.y = -0.21;
+    creamMesh.position.y = -0.12;
     jarGroup.add(creamMesh);
 
-    // Thin Rose Gold Separator Ring
-    const ringGeo = new THREE.TorusGeometry(0.93, 0.02, 16, 48);
-    const ringMesh = new THREE.Mesh(ringGeo, goldRimMaterial);
+    // 3. Screw Neck / Inner Threads
+    const neckGeo = new THREE.CylinderGeometry(1.035, 1.035, 0.12, 64);
+    const neckMesh = new THREE.Mesh(neckGeo, whiteThreadMaterial);
+    neckMesh.position.y = 0.16;
+    jarGroup.add(neckMesh);
+
+    // 4. Rose Gold Trim Ring
+    const ringGeo = new THREE.TorusGeometry(1.065, 0.016, 16, 64);
+    const ringMesh = new THREE.Mesh(ringGeo, roseGoldTrimMaterial);
     ringMesh.rotation.x = Math.PI / 2;
-    ringMesh.position.y = 0.25;
+    ringMesh.position.y = 0.13;
     jarGroup.add(ringMesh);
 
-    // Rose Gold Lid / Cap
-    const capGeo = new THREE.CylinderGeometry(0.96, 0.96, 0.48, 48);
-    const capMesh = new THREE.Mesh(capGeo, capMaterial);
-    capMesh.position.y = 0.51;
+    // 5. Blush Pink Screw Cap / Lid
+    const capGeo = new THREE.CylinderGeometry(1.09, 1.09, 0.36, 64);
+    const capMesh = new THREE.Mesh(capGeo, pinkPorcelainMaterial);
+    capMesh.position.y = 0.36;
     capMesh.castShadow = true;
     jarGroup.add(capMesh);
 
     // Cap Top Bevel Ring
-    const capBevelGeo = new THREE.CylinderGeometry(0.94, 0.96, 0.04, 48);
-    const capBevelMesh = new THREE.Mesh(capBevelGeo, capMaterial);
-    capBevelMesh.position.y = 0.75;
+    const capBevelGeo = new THREE.CylinderGeometry(1.06, 1.09, 0.04, 64);
+    const capBevelMesh = new THREE.Mesh(capBevelGeo, pinkPorcelainMaterial);
+    capBevelMesh.position.y = 0.54;
     jarGroup.add(capBevelMesh);
 
-    // Subtle Travertine Pedestal underneath
+    // 6. Authentic Circular Branding Sticker on Top of Lid
+    const stickerGeo = new THREE.CircleGeometry(1.03, 64);
+    const stickerMesh = new THREE.Mesh(stickerGeo, stickerMaterial);
+    stickerMesh.rotation.x = -Math.PI / 2;
+    stickerMesh.position.y = 0.562;
+    jarGroup.add(stickerMesh);
+
+    // Travertine Pedestal underneath
     const pedestalGeo = new THREE.CylinderGeometry(1.4, 1.45, 0.15, 48);
     const pedestalMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color('#EFEAE1'),
@@ -114,7 +141,7 @@ export default function ThreeHeroJar({ className = "" }) {
       metalness: 0.02
     });
     const pedestalMesh = new THREE.Mesh(pedestalGeo, pedestalMaterial);
-    pedestalMesh.position.y = -0.73;
+    pedestalMesh.position.y = -0.68;
     pedestalMesh.receiveShadow = true;
     scene.add(pedestalMesh);
 
@@ -139,7 +166,7 @@ export default function ThreeHeroJar({ className = "" }) {
     });
     const shadowMesh = new THREE.Mesh(shadowGeo, shadowMaterial);
     shadowMesh.rotation.x = -Math.PI / 2;
-    shadowMesh.position.y = -0.81;
+    shadowMesh.position.y = -0.76;
     scene.add(shadowMesh);
 
     // Radiance Floating Particles
@@ -208,13 +235,13 @@ export default function ThreeHeroJar({ className = "" }) {
     fillLight.position.set(0, -1, 3);
     scene.add(fillLight);
 
-    // Initial orientation
-    jarGroup.rotation.x = 0.12;
-    jarGroup.rotation.y = 0.45;
+    // Initial orientation: angled slightly forward so top circular branding is clearly visible
+    jarGroup.rotation.x = 0.32;
+    jarGroup.rotation.y = 0.25;
 
     // Mouse / Touch Interactivity
-    let targetRotY = 0.45;
-    let targetRotX = 0.12;
+    let targetRotY = 0.25;
+    let targetRotX = 0.32;
     let isDragging = false;
     let prevMousePos = { x: 0, y: 0 };
 
@@ -323,19 +350,27 @@ export default function ThreeHeroJar({ className = "" }) {
 
       // Clean up WebGL resources
       renderer.dispose();
-      glassGeo.dispose();
+      tubGeo.dispose();
+      tubBottomGeo.dispose();
       creamGeo.dispose();
+      neckGeo.dispose();
+      ringGeo.dispose();
       capGeo.dispose();
+      capBevelGeo.dispose();
+      stickerGeo.dispose();
       pedestalGeo.dispose();
       shadowGeo.dispose();
       particleGeo.dispose();
-      glassMaterial.dispose();
-      capMaterial.dispose();
+      pinkPorcelainMaterial.dispose();
+      whiteThreadMaterial.dispose();
       creamMaterial.dispose();
+      roseGoldTrimMaterial.dispose();
+      stickerMaterial.dispose();
       pedestalMaterial.dispose();
       shadowMaterial.dispose();
       particleMaterial.dispose();
       shadowTexture.dispose();
+      stickerTexture.dispose();
       pTexture.dispose();
       if (container.contains(domElem)) {
         container.removeChild(domElem);

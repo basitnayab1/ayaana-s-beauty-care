@@ -4,8 +4,11 @@ import { RotateCw, Sparkles, Wind } from 'lucide-react';
 
 export default function ThreeProductViewer({ productName = "Radiance Cream", className = "" }) {
   const containerRef = useRef(null);
-  const isToner = (productName || '').toLowerCase().includes('toner');
-  const isMask = (productName || '').toLowerCase().includes('mask');
+  const lowerName = (productName || '').toLowerCase();
+  const isToner = lowerName.includes('toner');
+  const isMask = !isToner && lowerName.includes('mask');
+  const isHandFeetCream = !isToner && !isMask && (lowerName.includes('hand') || lowerName.includes('feet') || lowerName.includes('foot'));
+  const isFaceWhiteningCream = !isToner && !isMask && !isHandFeetCream && (lowerName.includes('whitening') || lowerName.includes('face') || lowerName.includes('radiance') || lowerName.includes('repair'));
 
   const [isCapOpen, setIsCapOpen] = useState(false);
   const isCapOpenRef = useRef(isCapOpen);
@@ -62,6 +65,10 @@ export default function ThreeProductViewer({ productName = "Radiance Cream", cla
     // Position camera based on product shape
     if (isToner) {
       camera.position.set(0, 0.05, 4.3);
+    } else if (isHandFeetCream) {
+      camera.position.set(0, 0.38, 4.1);
+    } else if (isFaceWhiteningCream || isMask) {
+      camera.position.set(0, 0.22, 4.4);
     } else {
       camera.position.set(0, 0.35, 3.7);
     }
@@ -387,6 +394,202 @@ export default function ThreeProductViewer({ productName = "Radiance Cream", cla
       lidRingMesh.position.y = 0.63;
       capGroup.add(lidRingMesh);
 
+    } else if (isHandFeetCream) {
+      // --- AYAANA'S HAND AND FEET WHITENING CREAM (Shallow Blush-Pink Jar with Authentic Circular Lid Sticker) ---
+      const pinkPorcelainMaterial = new THREE.MeshPhysicalMaterial({
+        color: new THREE.Color('#F7D0DC'),
+        roughness: 0.18,
+        metalness: 0.04,
+        clearcoat: 0.85,
+        clearcoatRoughness: 0.12
+      });
+
+      const whiteThreadMaterial = new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#FFFFFF'),
+        roughness: 0.28,
+        metalness: 0.02
+      });
+
+      const roseGoldTrimMaterial = new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#E2A2B0'),
+        metalness: 0.92,
+        roughness: 0.18
+      });
+
+      const whiteningCreamMaterial = new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#FFFDFB'),
+        roughness: 0.38,
+        metalness: 0.02
+      });
+
+      const textureLoader = new THREE.TextureLoader();
+      lidTexture = textureLoader.load('/assets/hand_cream_sticker.png');
+      lidTexture.colorSpace = THREE.SRGBColorSpace;
+
+      const stickerMaterial = new THREE.MeshStandardMaterial({
+        map: lidTexture,
+        roughness: 0.22,
+        metalness: 0.02,
+        transparent: true
+      });
+
+      // 1. Blush Pink Shallow Jar Body
+      const tubGeo = new THREE.CylinderGeometry(1.08, 1.05, 0.58, 64);
+      const tubMesh = new THREE.Mesh(tubGeo, pinkPorcelainMaterial);
+      tubMesh.position.y = -0.16;
+      modelGroup.add(tubMesh);
+
+      const tubBottomGeo = new THREE.CylinderGeometry(1.05, 0.98, 0.08, 64);
+      const tubBottomMesh = new THREE.Mesh(tubBottomGeo, pinkPorcelainMaterial);
+      tubBottomMesh.position.y = -0.49;
+      modelGroup.add(tubBottomMesh);
+
+      // 2. White Screw Neck / Threads
+      const neckGeo = new THREE.CylinderGeometry(1.035, 1.035, 0.12, 64);
+      const neckMesh = new THREE.Mesh(neckGeo, whiteThreadMaterial);
+      neckMesh.position.y = 0.16;
+      modelGroup.add(neckMesh);
+
+      // 3. Luxurious Whipped Ivory Cream Inside
+      const creamGeo = new THREE.CylinderGeometry(0.98, 0.95, 0.44, 48);
+      const creamMesh = new THREE.Mesh(creamGeo, whiteningCreamMaterial);
+      creamMesh.position.y = -0.12;
+      modelGroup.add(creamMesh);
+
+      // Cream Swirl Peak
+      const swirlGeo = new THREE.SphereGeometry(0.95, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.2);
+      const swirlMesh = new THREE.Mesh(swirlGeo, whiteningCreamMaterial);
+      swirlMesh.position.y = 0.12;
+      swirlMesh.rotation.x = Math.PI;
+      modelGroup.add(swirlMesh);
+
+      // 4. Rose Gold Trim Accent Ring
+      const ringGeo = new THREE.TorusGeometry(1.065, 0.016, 16, 64);
+      const ringMesh = new THREE.Mesh(ringGeo, roseGoldTrimMaterial);
+      ringMesh.rotation.x = Math.PI / 2;
+      ringMesh.position.y = 0.13;
+      modelGroup.add(ringMesh);
+
+      // 5. Cap / Lid Group (Interactive Smooth Opening)
+      const capGroup = new THREE.Group();
+      modelGroup.add(capGroup);
+      capMeshRef.current = capGroup;
+
+      const lidGeo = new THREE.CylinderGeometry(1.09, 1.09, 0.36, 64);
+      const lidMesh = new THREE.Mesh(lidGeo, pinkPorcelainMaterial);
+      lidMesh.position.y = 0.36;
+      capGroup.add(lidMesh);
+
+      const capBevelGeo = new THREE.CylinderGeometry(1.06, 1.09, 0.04, 64);
+      const capBevelMesh = new THREE.Mesh(capBevelGeo, pinkPorcelainMaterial);
+      capBevelMesh.position.y = 0.54;
+      capGroup.add(capBevelMesh);
+
+      // Top Circular Label Sticker
+      const stickerGeo = new THREE.CircleGeometry(1.03, 64);
+      const stickerMesh = new THREE.Mesh(stickerGeo, stickerMaterial);
+      stickerMesh.rotation.x = -Math.PI / 2;
+      stickerMesh.position.y = 0.562;
+      capGroup.add(stickerMesh);
+
+    } else if (isFaceWhiteningCream) {
+      // --- AYANA'S FACE WHITENING CREAM (Shallow Blush-Pink Jar with Authentic Circular Lid Sticker) ---
+      const pinkPorcelainMaterial = new THREE.MeshPhysicalMaterial({
+        color: new THREE.Color('#F7D0DC'),
+        roughness: 0.18,
+        metalness: 0.04,
+        clearcoat: 0.85,
+        clearcoatRoughness: 0.12
+      });
+
+      const whiteThreadMaterial = new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#FFFFFF'),
+        roughness: 0.28,
+        metalness: 0.02
+      });
+
+      const roseGoldTrimMaterial = new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#E2A2B0'),
+        metalness: 0.92,
+        roughness: 0.18
+      });
+
+      const whiteningCreamMaterial = new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#FFFDFB'),
+        roughness: 0.38,
+        metalness: 0.02
+      });
+
+      const textureLoader = new THREE.TextureLoader();
+      lidTexture = textureLoader.load('/assets/face_whitening_cream_lid_texture.png');
+      lidTexture.colorSpace = THREE.SRGBColorSpace;
+
+      const stickerMaterial = new THREE.MeshStandardMaterial({
+        map: lidTexture,
+        roughness: 0.22,
+        metalness: 0.02,
+        transparent: true
+      });
+
+      // 1. Blush Pink Shallow Jar Tub Body
+      const tubGeo = new THREE.CylinderGeometry(1.08, 1.05, 0.58, 64);
+      const tubMesh = new THREE.Mesh(tubGeo, pinkPorcelainMaterial);
+      tubMesh.position.y = -0.16;
+      modelGroup.add(tubMesh);
+
+      const tubBottomGeo = new THREE.CylinderGeometry(1.05, 0.98, 0.08, 64);
+      const tubBottomMesh = new THREE.Mesh(tubBottomGeo, pinkPorcelainMaterial);
+      tubBottomMesh.position.y = -0.49;
+      modelGroup.add(tubBottomMesh);
+
+      // 2. White Screw Neck / Threads
+      const neckGeo = new THREE.CylinderGeometry(1.035, 1.035, 0.12, 64);
+      const neckMesh = new THREE.Mesh(neckGeo, whiteThreadMaterial);
+      neckMesh.position.y = 0.16;
+      modelGroup.add(neckMesh);
+
+      // 3. Luxurious Whipped Ivory Cream Inside
+      const creamGeo = new THREE.CylinderGeometry(0.98, 0.95, 0.44, 48);
+      const creamMesh = new THREE.Mesh(creamGeo, whiteningCreamMaterial);
+      creamMesh.position.y = -0.12;
+      modelGroup.add(creamMesh);
+
+      // Cream Swirl Peak
+      const swirlGeo = new THREE.SphereGeometry(0.95, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.2);
+      const swirlMesh = new THREE.Mesh(swirlGeo, whiteningCreamMaterial);
+      swirlMesh.position.y = 0.12;
+      swirlMesh.rotation.x = Math.PI;
+      modelGroup.add(swirlMesh);
+
+      // 4. Rose Gold Trim Accent Ring
+      const ringGeo = new THREE.TorusGeometry(1.065, 0.016, 16, 64);
+      const ringMesh = new THREE.Mesh(ringGeo, roseGoldTrimMaterial);
+      ringMesh.rotation.x = Math.PI / 2;
+      ringMesh.position.y = 0.13;
+      modelGroup.add(ringMesh);
+
+      // 5. Cap / Lid Group (Interactive Smooth Opening)
+      const capGroup = new THREE.Group();
+      modelGroup.add(capGroup);
+      capMeshRef.current = capGroup;
+
+      const lidGeo = new THREE.CylinderGeometry(1.09, 1.09, 0.36, 64);
+      const lidMesh = new THREE.Mesh(lidGeo, pinkPorcelainMaterial);
+      lidMesh.position.y = 0.36;
+      capGroup.add(lidMesh);
+
+      const capBevelGeo = new THREE.CylinderGeometry(1.06, 1.09, 0.04, 64);
+      const capBevelMesh = new THREE.Mesh(capBevelGeo, pinkPorcelainMaterial);
+      capBevelMesh.position.y = 0.54;
+      capGroup.add(capBevelMesh);
+
+      // Top Circular Label Sticker (FACE WHITENING CREAM)
+      const stickerGeo = new THREE.CircleGeometry(1.03, 64);
+      const stickerMesh = new THREE.Mesh(stickerGeo, stickerMaterial);
+      stickerMesh.rotation.x = -Math.PI / 2;
+      stickerMesh.position.y = 0.562;
+      capGroup.add(stickerMesh);
+
     } else {
       // --- LUXURY GLASS JAR (For Radiance Skin Repair Creams) ---
       const capMaterial = new THREE.MeshStandardMaterial({
@@ -468,8 +671,8 @@ export default function ThreeProductViewer({ productName = "Radiance Cream", cla
     // Initial angle
     let isDragging = false;
     let prevMouse = { x: 0, y: 0 };
-    let targetRotY = 0; // Front label facing forward
-    let targetRotX = isToner ? 0.04 : (isMask ? 0.38 : 0.15);
+    let targetRotY = isHandFeetCream ? 0.22 : 0; // Front label facing forward
+    let targetRotX = isToner ? 0.04 : ((isMask || isFaceWhiteningCream || isHandFeetCream) ? 0.36 : 0.15);
 
     const onMouseDown = (e) => {
       isDragging = true;
@@ -577,10 +780,12 @@ export default function ThreeProductViewer({ productName = "Radiance Cream", cla
       } else {
         // Smooth lid open/closed for Cream / Mask Jars
         if (capMeshRef.current) {
-          const targetCapY = isCapOpenRef.current ? 0.85 : 0;
-          const targetCapRotZ = isCapOpenRef.current ? 0.28 : 0;
+          const targetCapY = isCapOpenRef.current ? 0.95 : 0;
+          const targetCapRotZ = isCapOpenRef.current ? 0.35 : 0;
+          const targetCapRotX = isCapOpenRef.current ? -0.12 : 0;
           capMeshRef.current.position.y += (targetCapY - capMeshRef.current.position.y) * 0.1;
           capMeshRef.current.rotation.z += (targetCapRotZ - capMeshRef.current.rotation.z) * 0.1;
+          capMeshRef.current.rotation.x += (targetCapRotX - capMeshRef.current.rotation.x) * 0.1;
         }
       }
 
@@ -615,7 +820,7 @@ export default function ThreeProductViewer({ productName = "Radiance Cream", cla
       renderer.dispose();
       if (container.contains(dom)) container.removeChild(dom);
     };
-  }, [productName, isToner, isMask]);
+  }, [productName, isToner, isMask, isFaceWhiteningCream, isHandFeetCream]);
 
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', height: '100%' }} className={className}>
@@ -785,6 +990,7 @@ export default function ThreeProductViewer({ productName = "Radiance Cream", cla
           </>
         ) : (
           <button
+            id="toggle-cream-lid-btn"
             onClick={() => setIsCapOpen(!isCapOpen)}
             style={{
               display: 'flex',

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-export default function Tilt3DCard({ children, className = "", style = {}, maxTilt = 14, scale = 1.02, onClick }) {
+export default function Tilt3DCard({ children, id, className = "", style = {}, maxTilt = 14, scale = 1.02, onClick, ...rest }) {
   const cardRef = useRef(null);
   const [transformStyle, setTransformStyle] = useState('perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
   const [glareStyle, setGlareStyle] = useState({ opacity: 0, x: 50, y: 50 });
@@ -41,7 +41,9 @@ export default function Tilt3DCard({ children, className = "", style = {}, maxTi
   return (
     <div
       ref={cardRef}
+      id={id}
       onClick={onClick}
+      {...rest}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

@@ -32,6 +32,7 @@ export default function ProductCard({ product }) {
       onClick={() => setActiveProduct(product)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      id={`product-card-${product.id}`}
       className="card-3d"
       style={{
         display: 'flex',

@@ -426,6 +426,27 @@ h1:hover, h2:hover {
   min-height: 0;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(18, 18, 18, 0.25) rgba(0, 0, 0, 0.04);
+}
+
+.modal-scroll-body::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.modal-scroll-body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
+}
+
+.modal-scroll-body::-webkit-scrollbar-thumb {
+  background: rgba(18, 18, 18, 0.25);
+  border-radius: 4px;
+}
+
+.modal-scroll-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(18, 18, 18, 0.4);
 }
 
 /* On shorter laptop screens or mobile, align from top with comfortable padding */

@@ -1,8 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, CheckCircle2, MessageCircle } from 'lucide-react';
 import { BRAND_CONFIG } from '../data/products';
+import { useShop } from '../context/ShopContext';
+import ThreeProductViewer from './ThreeProductViewer';
 
 export default function BeforeAfterSection() {
+  const { transformationModel, products, formatPrice, setActiveProduct } = useShop();
+  // Map modelType to a product name string that ThreeProductViewer can detect
+  const MODEL_TYPE_NAMES = {
+    'hand-feet-cream': 'Hand and Feet Whitening Cream',
+    'face-whitening-cream': 'Face Whitening Cream',
+    'toner': 'Herbal Whitening Radiance Toner'
+  };
+  const transModelProductName = MODEL_TYPE_NAMES[transformationModel?.modelType] || 'Hand and Feet Whitening Cream';
+  const transLinkedProduct = transformationModel?.productId
+    ? products.find(p => p.id === transformationModel.productId)
+    : null;
+
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef(null);
@@ -58,6 +72,41 @@ export default function BeforeAfterSection() {
           <p style={{ color: '#736C65', fontSize: '15px', marginTop: '12px' }}>
             Real customer results shared directly via WhatsApp. Zero photo editing, just pure botanical nourishment and cellular barrier repair.
           </p>
+        </div>
+
+        {/* Admin-selected 3D Product Model */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '48px' }}>
+          <div
+            className="glass-panel"
+            style={{
+              borderRadius: '28px',
+              padding: '24px',
+              maxWidth: '440px',
+              width: '100%',
+              textAlign: 'center',
+              boxShadow: 'var(--shadow-luxury)',
+              border: '1px solid rgba(226, 130, 159, 0.2)'
+            }}
+          >
+            <div style={{ height: '300px', width: '100%' }}>
+              <ThreeProductViewer productName={transModelProductName} />
+            </div>
+            {transLinkedProduct && (
+              <div style={{ marginTop: '12px' }}>
+                <div style={{ fontSize: '15px', fontWeight: 800, color: '#121212' }}>{transLinkedProduct.name}</div>
+                <div style={{ fontSize: '22px', fontWeight: 800, color: '#C75678', marginTop: '4px' }}>
+                  {formatPrice(transLinkedProduct.pricePKR, transLinkedProduct.priceUSD)}
+                </div>
+                <button
+                  onClick={() => setActiveProduct(transLinkedProduct)}
+                  className="btn-primary"
+                  style={{ marginTop: '12px', padding: '9px 20px', fontSize: '13px' }}
+                >
+                  View Product
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Content Grid */}
