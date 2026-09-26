@@ -933,17 +933,19 @@ export default function ThreeProductViewer({ productName = "Radiance Cream", cla
           transform: 'translateX(-50%)',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          padding: '6px 14px',
+          gap: '6px',
+          padding: '5px 12px',
+          maxWidth: 'calc(100% - 16px)',
+          overflowX: 'auto',
           borderRadius: '9999px',
-          backgroundColor: 'rgba(255, 255, 255, 0.92)',
+          backgroundColor: 'rgba(255, 255, 255, 0.94)',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(18, 18, 18, 0.08)',
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-          fontSize: '11.5px',
+          fontSize: '11px',
           color: '#2E2B28',
           zIndex: 5,
-          whiteSpace: 'nowrap'
+          scrollbarWidth: 'none'
         }}
       >
         {isToner ? (

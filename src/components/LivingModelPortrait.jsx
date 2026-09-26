@@ -88,6 +88,27 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
     setTilt({ x: rotateX, y: rotateY });
   };
 
+  // Handle Touch Move for Mobile/Tablet Head Tracking
+  const handleTouchMove = (e) => {
+    if (!containerRef.current || !e.touches || !e.touches[0]) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateY = ((x - centerX) / centerX) * 5.5;
+    const rotateX = -((y - centerY) / centerY) * 4.5;
+
+    setTilt({ x: rotateX, y: rotateY });
+  };
+
+  const handleTouchEnd = () => {
+    setTilt({ x: 0, y: 0 });
+  };
+
   const handleMouseLeave = () => {
     setTilt({ x: 0, y: 0 });
   };
@@ -104,6 +125,8 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       onClick={() => {
         handleManualBlink();
         if (onQuickView) onQuickView();
@@ -379,16 +402,18 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
                 bottom: '26px',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                width: '220px',
-                padding: '14px',
-                background: 'rgba(18, 18, 18, 0.92)',
+                width: 'max-content',
+                maxWidth: 'min(230px, calc(100vw - 48px))',
+                padding: '12px 14px',
+                background: 'rgba(18, 18, 18, 0.94)',
                 backdropFilter: 'blur(16px)',
                 borderRadius: '16px',
                 border: '1px solid rgba(226, 130, 159, 0.5)',
                 color: '#FFFFFF',
                 boxShadow: '0 12px 30px rgba(0, 0, 0, 0.5)',
                 pointerEvents: 'none',
-                zIndex: 10
+                zIndex: 10,
+                boxSizing: 'border-box'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>

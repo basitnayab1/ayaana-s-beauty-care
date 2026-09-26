@@ -88,6 +88,35 @@ export default function ReviewsSection() {
     setProgress(0);
   };
 
+  // Mobile Touch Swipe Handling
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  const handleTouchStart = (e) => {
+    setIsPlaying(false);
+    if (e.touches && e.touches[0]) {
+      touchStartX.current = e.touches[0].clientX;
+      touchEndX.current = e.touches[0].clientX;
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches && e.touches[0]) {
+      touchEndX.current = e.touches[0].clientX;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchEndX.current;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
+    }
+  };
+
 
   // Use admin-managed reviews from context
   const reviews = siteReviews || [];
@@ -252,6 +281,9 @@ export default function ReviewsSection() {
           >
             {/* Image Stage */}
             <div
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
               style={{
                 position: 'relative',
                 backgroundColor: '#1E1B19',
@@ -259,8 +291,10 @@ export default function ReviewsSection() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 overflow: 'hidden',
-                minHeight: '440px',
-                maxHeight: '560px'
+                minHeight: 'clamp(280px, 48vw, 480px)',
+                maxHeight: '560px',
+                touchAction: 'pan-y',
+                cursor: 'grab'
               }}
             >
               <img

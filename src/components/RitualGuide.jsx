@@ -8,30 +8,30 @@ export default function RitualGuide() {
   const steps = [
     {
       number: "01",
-      title: "Purify & Balance",
-      subtitle: "Rose Damascena Clarifying Wash",
-      desc: "Wash away impurities without stripping vital lipids. Prepares the dermal stratum for deeper nutrient absorption.",
+      title: "Tone & Brighten",
+      subtitle: "Herbal Whitening Radiance Toner",
+      desc: "Refreshes, tightens pores, and deeply balances pH with pure rose petal hydrosol for spotless clarity.",
       time: "Morning & Night",
-      productId: "rose-damascena-clarifying-cleanser",
-      image: "/assets/radiance_toner.jpg"
+      productId: "herbal-whitening-toner",
+      image: "/assets/face_whitening_cream.jpg"
     },
     {
       number: "02",
-      title: "Tone & Brighten",
-      subtitle: "Whitening Toner",
-      desc: "Refreshes, hydrates, and brightens your skin for a healthy glow. Leaves your face feeling smooth, fresh, and radiant.",
-      time: "Morning & Night",
-      productId: "whitening-toner",
-      image: "/assets/whitening_toner.png"
+      title: "Rejuvenate & Seal",
+      subtitle: "Face Whitening & Radiance Cream",
+      desc: "Massage a pearl-sized amount of velvet face cream to lock in 72-hour moisture and restore a lit-from-within glow.",
+      time: "Twice Daily",
+      productId: "face-whitening-cream",
+      image: "/assets/face_whitening_cream.jpg"
     },
     {
       number: "03",
-      title: "Rejuvenate & Seal",
-      subtitle: "24K Gold Elixir & Skin Repair Cream",
-      desc: "Press 3 drops of 24K gold serum, then massage the velvet repair cream to lock in 72-hour luminous glass skin.",
-      time: "Twice Daily",
-      productId: "radiance-skin-repair-cream",
-      image: "/assets/hero_cream.jpg"
+      title: "Intensive Body & Feet Care",
+      subtitle: "Hand & Feet Whitening Cream",
+      desc: "Apply to hands, dark knuckles, ankles, and feet to eliminate rough patches and reveal spotless, even-toned skin.",
+      time: "Before Bedtime",
+      productId: "hand-and-feet-whitening-cream",
+      image: "/assets/hand_and_feet_cream.jpg"
     }
   ];
 
@@ -55,7 +55,7 @@ export default function RitualGuide() {
         {/* Steps Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '24px' }}>
           {steps.map((step, idx) => {
-            const prod = products.find((p) => p.id === step.productId);
+            const prod = products.find((p) => p.id === step.productId) || products[idx % products.length];
             return (
               <div
                 key={idx}

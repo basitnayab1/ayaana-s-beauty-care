@@ -115,11 +115,12 @@ export default function ModelRoutineModal() {
           {displayProducts.map((prod) => (
             <div
               key={prod.id}
+              className="routine-product-card"
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '16px',
-                padding: '14px',
+                gap: '14px',
+                padding: '12px 14px',
                 borderRadius: '16px',
                 backgroundColor: '#FAF7F2',
                 border: '1px solid var(--border-card)',
@@ -235,6 +236,7 @@ export default function ModelRoutineModal() {
 
         {/* Footer with Bulk Add */}
         <div
+          className="routine-modal-footer"
           style={{
             padding: '16px 24px',
             backgroundColor: '#FAF7F2',
@@ -242,7 +244,8 @@ export default function ModelRoutineModal() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '12px'
+            gap: '12px',
+            flexWrap: 'wrap'
           }}
         >
           <span style={{ fontSize: '12.5px', color: '#736C65', fontWeight: 600 }}>
@@ -264,6 +267,22 @@ export default function ModelRoutineModal() {
             <ArrowRight style={{ width: '14px', height: '14px' }} />
           </button>
         </div>
+
+        <style>{`
+          @media (max-width: 480px) {
+            .routine-product-card {
+              flex-wrap: wrap !important;
+            }
+            .routine-modal-footer {
+              flex-direction: column !important;
+              align-items: stretch !important;
+            }
+            .routine-modal-footer button {
+              width: 100% !important;
+              justify-content: center !important;
+            }
+          }
+        `}</style>
       </div>
     </div>
   );

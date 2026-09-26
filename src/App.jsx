@@ -259,8 +259,8 @@ function MainStore() {
         rel="noopener noreferrer"
         style={{
           position: 'fixed',
-          bottom: '24px',
-          right: '24px',
+          bottom: 'max(20px, env(safe-area-inset-bottom, 20px))',
+          right: 'max(16px, env(safe-area-inset-right, 16px))',
           backgroundColor: '#25D366',
           color: '#FFFFFF',
           width: '56px',

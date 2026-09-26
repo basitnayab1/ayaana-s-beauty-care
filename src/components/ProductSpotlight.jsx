@@ -153,7 +153,7 @@ export default function ProductSpotlight() {
                 </span>
               </div>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+              <div className="spotlight-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                 <button
                   onClick={() => addToCart(heroProduct, 1)}
                   className="btn-primary"
@@ -185,6 +185,19 @@ export default function ProductSpotlight() {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 480px) {
+          .spotlight-actions {
+            flex-direction: column !important;
+          }
+          .spotlight-actions button,
+          .spotlight-actions a {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }

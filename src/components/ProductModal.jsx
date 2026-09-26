@@ -140,7 +140,7 @@ export default function ProductModal() {
         <div
           ref={modalBodyRef}
           style={{
-            padding: '32px 28px',
+            padding: 'clamp(16px, 3.5vw, 28px) clamp(14px, 3vw, 24px)',
             overflowY: 'auto',
             maxHeight: 'calc(90vh - 70px)'
           }}
@@ -148,8 +148,8 @@ export default function ProductModal() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-              gap: '36px',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+              gap: 'clamp(20px, 3vw, 36px)',
               alignItems: 'start'
             }}
           >
@@ -480,11 +480,11 @@ export default function ProductModal() {
           </div>
 
           {/* Bottom Related Products Section */}
-          <div style={{ padding: '24px 36px', backgroundColor: '#FFFFFF', borderTop: '1px solid rgba(18, 18, 18, 0.08)' }}>
-            <h4 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '14px' }}>
+          <div style={{ padding: 'clamp(16px, 3vw, 24px) clamp(14px, 3vw, 24px)', backgroundColor: '#FFFFFF', borderTop: '1px solid rgba(18, 18, 18, 0.08)' }}>
+            <h4 style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '12px' }}>
               Frequently Paired Together:
             </h4>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '12px' }}>
               {relatedProducts.map((rel) => (
                 <div
                   key={rel.id}
