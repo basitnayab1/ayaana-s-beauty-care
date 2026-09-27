@@ -6,12 +6,15 @@
 const STORAGE_KEY_URL = 'ayaana_supabase_url';
 const STORAGE_KEY_ANON = 'ayaana_supabase_anon';
 
+const DEFAULT_SUPABASE_URL = 'https://mwcdfyjtdomkihsshjsu.supabase.co';
+const DEFAULT_SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13Y2RmeWp0ZG9ta2loc3NoanN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MDgxMDUsImV4cCI6MjEwNTk4NDEwNX0.I0T_s7hO2T-Jd4IkX5G6j30WMHvy-hdp4DnUQspCe9A';
+
 export function getSupabaseConfig() {
-  const url = localStorage.getItem(STORAGE_KEY_URL) || import.meta.env.VITE_SUPABASE_URL || '';
-  const anon = localStorage.getItem(STORAGE_KEY_ANON) || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const url = localStorage.getItem(STORAGE_KEY_URL) || import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+  const anon = localStorage.getItem(STORAGE_KEY_ANON) || import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON;
   return {
-    url: url.trim(),
-    anon: anon.trim(),
+    url: (url || '').trim(),
+    anon: (anon || '').trim(),
     isConnected: Boolean(url && anon)
   };
 }

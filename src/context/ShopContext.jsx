@@ -35,6 +35,56 @@ export function saveDeletedProductIds(setOrArray) {
   }
 }
 
+export const mapDbToProduct = (dbProd) => ({
+  id: dbProd.id,
+  name: dbProd.name,
+  tagline: dbProd.tagline || '',
+  category: dbProd.category || 'repair-creams',
+  categoryName: dbProd.category_name || dbProd.category || 'Whitening & Glow Creams',
+  volume: dbProd.volume || '50g',
+  pricePKR: Number(dbProd.price_pkr) || 0,
+  originalPricePKR: Number(dbProd.original_price_pkr) || Math.round((Number(dbProd.price_pkr) || 0) * 1.2),
+  priceUSD: Number(dbProd.price_usd) || Number(((Number(dbProd.price_pkr) || 0) * 0.0036).toFixed(2)),
+  originalPriceUSD: Number(((Number(dbProd.price_pkr) || 0) * 0.0036 * 1.2).toFixed(2)),
+  stock: dbProd.stock !== undefined ? Number(dbProd.stock) : 50,
+  badge: dbProd.badge || '',
+  has3D: Boolean(dbProd.has_3d),
+  isHero: false,
+  image: dbProd.image || '/assets/face_whitening_cream.jpg',
+  secondaryImage: (Array.isArray(dbProd.images) && dbProd.images[1]) || dbProd.image || '/assets/face_whitening_cream.jpg',
+  images: Array.isArray(dbProd.images) && dbProd.images.length > 0 ? dbProd.images : [dbProd.image || '/assets/face_whitening_cream.jpg'],
+  description: dbProd.description || '',
+  howToUse: dbProd.how_to_use || '',
+  ingredients: dbProd.ingredients || '',
+  benefits: Array.isArray(dbProd.benefits) ? dbProd.benefits : [],
+  clinicalResults: dbProd.clinical_results || '100% agreed skin felt smoother and brighter.',
+  rating: Number(dbProd.rating) || 5.0,
+  reviewsCount: Number(dbProd.reviews_count) || 100
+});
+
+export const mapProductToDb = (p) => ({
+  id: p.id,
+  name: p.name,
+  tagline: p.tagline || '',
+  category: p.category || 'repair-creams',
+  category_name: p.categoryName || '',
+  volume: p.volume || '50g',
+  price_pkr: Number(p.pricePKR) || 0,
+  original_price_pkr: Number(p.originalPricePKR) || Math.round((Number(p.pricePKR) || 0) * 1.2),
+  price_usd: Number(p.priceUSD) || Number(((Number(p.pricePKR) || 0) * 0.0036).toFixed(2)),
+  stock: Number(p.stock) !== undefined ? Number(p.stock) : 50,
+  badge: p.badge || '',
+  image: p.image || (Array.isArray(p.images) && p.images[0]) || '',
+  images: Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image],
+  description: p.description || '',
+  how_to_use: p.howToUse || '',
+  ingredients: p.ingredients || '',
+  benefits: Array.isArray(p.benefits) ? p.benefits : [],
+  has_3d: Boolean(p.has3D),
+  rating: Number(p.rating) || 5.0,
+  reviews_count: Number(p.reviewsCount) || 100
+});
+
 export function ShopProvider({ children }) {
   // Products state (preserves admin additions, edits, order & permanently removes deleted items)
   const [products, setProducts] = useState(() => {
@@ -276,6 +326,40 @@ export function ShopProvider({ children }) {
     localStorage.setItem('ayaana_products', JSON.stringify(products));
   }, [products]);
 
+  // 🔄 Real-time Cloud Sync with Supabase on Mount & Tab Focus
+  useEffect(() => {
+    let isMounted = true;
+
+    async function syncProductsFromCloud() {
+      try {
+        const { data, error } = await supabaseQuery('products?select=*&order=created_at.asc');
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const mapped = data.map(mapDbToProduct);
+          const deletedIds = getDeletedProductIds();
+          const cleanProducts = mapped.filter((p) => !deletedIds.has(p.id) && !DEPRECATED_PRODUCT_IDS.has(p.id));
+
+          if (isMounted && cleanProducts.length > 0) {
+            setProducts(cleanProducts);
+            localStorage.setItem('ayaana_products', JSON.stringify(cleanProducts));
+          }
+        }
+      } catch (e) {
+        console.warn("Cloud products sync fallback:", e);
+      }
+    }
+
+    syncProductsFromCloud();
+
+    // Re-check cloud when user refocuses tab / switches browser
+    const handleFocus = () => { syncProductsFromCloud(); };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('ayaana_orders', JSON.stringify(recentOrders));
   }, [recentOrders]);
@@ -450,34 +534,66 @@ export function ShopProvider({ children }) {
       saveDeletedProductIds(deletedSet);
     }
 
-    setProducts((prev) => [productToAdd, ...prev]);
+    setProducts((prev) => {
+      const updated = [productToAdd, ...prev];
+      localStorage.setItem('ayaana_products', JSON.stringify(updated));
+      return updated;
+    });
+
+    // ☁️ Sync to Supabase Cloud Database (all devices get this immediately)
+    supabaseQuery('products', {
+      method: 'POST',
+      prefer: 'resolution=merge-duplicates',
+      body: mapProductToDb(productToAdd)
+    }).catch((err) => console.warn("Cloud product add error:", err));
+
     return productToAdd;
   };
 
   const updateProduct = (updatedProd) => {
     const updatedPricePKR = Number(updatedProd.pricePKR);
-    setProducts((prev) =>
-      prev.map((item) => {
-        if (item.id === updatedProd.id) {
-          const imageList = Array.isArray(updatedProd.images) && updatedProd.images.filter(Boolean).length > 0
-            ? updatedProd.images.filter(Boolean)
-            : [updatedProd.image || item.image];
-          const primaryImage = updatedProd.image || imageList[0];
+    const imageList = Array.isArray(updatedProd.images) && updatedProd.images.filter(Boolean).length > 0
+      ? updatedProd.images.filter(Boolean)
+      : [updatedProd.image];
+    const primaryImage = updatedProd.image || imageList[0];
 
-          return {
-            ...item,
-            ...updatedProd,
-            image: primaryImage,
-            images: imageList,
-            pricePKR: updatedPricePKR || item.pricePKR,
-            priceUSD: Number((updatedPricePKR * 0.0036).toFixed(2)) || item.priceUSD,
-            originalPricePKR: Math.round((updatedPricePKR || item.pricePKR) * 1.2),
-            stock: Number(updatedProd.stock) !== undefined ? Number(updatedProd.stock) : item.stock
-          };
-        }
-        return item;
-      })
-    );
+    const mergedProduct = {
+      ...updatedProd,
+      image: primaryImage,
+      images: imageList,
+      pricePKR: updatedPricePKR,
+      priceUSD: Number((updatedPricePKR * 0.0036).toFixed(2)),
+      originalPricePKR: Math.round(updatedPricePKR * 1.2),
+      stock: Number(updatedProd.stock) !== undefined ? Number(updatedProd.stock) : 50
+    };
+
+    setProducts((prev) => {
+      const updated = prev.map((item) => (item.id === updatedProd.id ? { ...item, ...mergedProduct } : item));
+      localStorage.setItem('ayaana_products', JSON.stringify(updated));
+      return updated;
+    });
+
+    // ☁️ Sync update to Supabase Cloud Database (all devices get this immediately)
+    supabaseQuery(`products?id=eq.${updatedProd.id}`, {
+      method: 'PATCH',
+      body: {
+        name: updatedProd.name,
+        tagline: updatedProd.tagline,
+        category: updatedProd.category,
+        category_name: updatedProd.categoryName,
+        volume: updatedProd.volume,
+        price_pkr: updatedPricePKR,
+        original_price_pkr: Math.round(updatedPricePKR * 1.2),
+        price_usd: Number((updatedPricePKR * 0.0036).toFixed(2)),
+        stock: Number(updatedProd.stock) !== undefined ? Number(updatedProd.stock) : 50,
+        badge: updatedProd.badge,
+        image: primaryImage,
+        images: imageList,
+        description: updatedProd.description,
+        how_to_use: updatedProd.howToUse,
+        ingredients: updatedProd.ingredients
+      }
+    }).catch((err) => console.warn("Cloud product update error:", err));
   };
 
   const deleteProduct = (productId) => {
