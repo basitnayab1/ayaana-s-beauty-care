@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { ShopProvider, useShop } from './context/ShopContext';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
-import ZeroGravityShowcase from './components/ZeroGravityShowcase';
 import BrandValues from './components/BrandValues';
 import Marquee3D from './components/Marquee3D';
 import CategoryFilter from './components/CategoryFilter';
@@ -79,10 +78,7 @@ function MainStore() {
           }}
         />
 
-        {/* 5. 16:9 Zero-Gravity 8K Products Cinematic Showcase */}
-        <ZeroGravityShowcase />
-
-        {/* 6. Tilted 3D Perspective Marquee Ribbon */}
+        {/* 5. Tilted 3D Perspective Marquee Ribbon */}
         <Marquee3D />
 
         {/* 6. Luxury Brand Assurances */}
