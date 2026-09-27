@@ -11,10 +11,9 @@ import {
   Pause,
   Maximize2,
   CheckCircle2,
-  Zap,
-  ArrowRight
+  Zap
 } from 'lucide-react';
-import { BRAND_CONFIG } from '../data/products';
+import ThreeZeroGravityProduct from './ThreeZeroGravityProduct';
 
 const ZERO_GRAVITY_SLIDES = [
   {
@@ -103,11 +102,13 @@ export default function ZeroGravityShowcase() {
   const { products, formatPrice, setActiveProduct, addToCart, setIsCartOpen } = useShop();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [viewMode, setViewMode] = useState('3d'); // '3d' | 'photo'
+  const [is3DInteracting, setIs3DInteracting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
   const [isFullscreenModalOpen, setIsFullscreenModalOpen] = useState(false);
 
-  const slideDuration = 4500; // 4.5 seconds per slide
+  const slideDuration = 5000; // 5 seconds per slide
   const timerRef = useRef(null);
   const progressTimerRef = useRef(null);
   const showcaseRef = useRef(null);
@@ -115,9 +116,10 @@ export default function ZeroGravityShowcase() {
   const currentSlide = ZERO_GRAVITY_SLIDES[currentIndex];
   const linkedProduct = products.find((p) => p.id === currentSlide.productId) || products[0];
 
-  // Auto-play timer
+  // Auto-play timer (pauses when user is interacting with 3D Zero-G model)
   useEffect(() => {
-    if (!isPlaying) {
+    // If user is actively playing with the 3D model on slide 0, hold slide
+    if (!isPlaying || (currentIndex === 0 && viewMode === '3d' && is3DInteracting)) {
       if (timerRef.current) clearInterval(timerRef.current);
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
       return;
@@ -354,7 +356,7 @@ export default function ZeroGravityShowcase() {
             transition: isPlaying ? 'transform 0.5s ease-out' : 'transform 0.15s ease-out'
           }}
         >
-          {/* Active 16:9 8K Zero-Gravity Image with subtle animation */}
+          {/* Active 16:9 Background Layer */}
           <div
             key={currentIndex}
             style={{
@@ -374,10 +376,33 @@ export default function ZeroGravityShowcase() {
                 objectFit: 'cover',
                 display: 'block',
                 animation: 'subtleScale 6s ease-out forwards',
-                filter: 'brightness(1.02) contrast(1.02)'
+                filter: currentIndex === 0 && viewMode === '3d'
+                  ? 'brightness(0.28) blur(10px) contrast(1.15)'
+                  : 'brightness(1.02) contrast(1.02)',
+                transition: 'filter 0.5s ease'
               }}
             />
           </div>
+
+          {/* Real-time 3D Zero-Gravity Product with 3D Particles for First Product */}
+          {currentIndex === 0 && viewMode === '3d' && (
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: 6
+              }}
+            >
+              <ThreeZeroGravityProduct
+                onInteractChange={(interacting) => {
+                  setIs3DInteracting(interacting);
+                  if (interacting) setIsPlaying(false);
+                }}
+              />
+            </div>
+          )}
 
           {/* Vignette & Cinematic Gradients */}
           <div
@@ -386,7 +411,8 @@ export default function ZeroGravityShowcase() {
               inset: 0,
               background:
                 'radial-gradient(ellipse at center, transparent 40%, rgba(5,4,3,0.55) 85%, rgba(5,4,3,0.9) 100%)',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              zIndex: 7
             }}
           />
           <div
@@ -397,7 +423,8 @@ export default function ZeroGravityShowcase() {
               right: 0,
               height: '65%',
               background: 'linear-gradient(to top, rgba(5,4,3,0.92) 0%, rgba(5,4,3,0.4) 60%, transparent 100%)',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              zIndex: 7
             }}
           />
 
@@ -411,36 +438,89 @@ export default function ZeroGravityShowcase() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              zIndex: 10
+              zIndex: 20
             }}
           >
-            {/* Tag Badge */}
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                backgroundColor: 'rgba(18, 18, 18, 0.75)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(12px)',
-                padding: '6px 14px',
-                borderRadius: '9999px',
-                fontSize: '11px',
-                fontWeight: 700,
-                color: '#FFFFFF'
-              }}
-            >
-              <span
+            {/* Tag Badge & 3D Switcher */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <div
                 style={{
-                  width: '7px',
-                  height: '7px',
-                  borderRadius: '50%',
-                  backgroundColor: currentSlide.accentColor,
-                  display: 'inline-block',
-                  boxShadow: `0 0 10px ${currentSlide.accentColor}`
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: 'rgba(18, 18, 18, 0.75)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  backdropFilter: 'blur(12px)',
+                  padding: '6px 14px',
+                  borderRadius: '9999px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  color: '#FFFFFF'
                 }}
-              />
-              <span>{currentSlide.tag}</span>
+              >
+                <span
+                  style={{
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    backgroundColor: currentSlide.accentColor,
+                    display: 'inline-block',
+                    boxShadow: `0 0 10px ${currentSlide.accentColor}`
+                  }}
+                />
+                <span>{currentSlide.tag}</span>
+              </div>
+
+              {/* 3D vs 8K Photo Toggle for First Product */}
+              {currentIndex === 0 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    background: 'rgba(18, 18, 18, 0.85)',
+                    padding: '3px',
+                    borderRadius: '9999px',
+                    border: '1px solid rgba(226, 130, 159, 0.4)',
+                    backdropFilter: 'blur(12px)',
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.4)'
+                  }}
+                >
+                  <button
+                    onClick={() => setViewMode('3d')}
+                    style={{
+                      background: viewMode === '3d' ? 'linear-gradient(135deg, #E2829F, #C75678)' : 'transparent',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      padding: '4px 12px',
+                      borderRadius: '9999px',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      boxShadow: viewMode === '3d' ? '0 2px 8px rgba(199, 86, 120, 0.4)' : 'none'
+                    }}
+                  >
+                    <Sparkles style={{ width: '12px', height: '12px' }} />
+                    <span>3D 0-Gravity</span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('photo')}
+                    style={{
+                      background: viewMode === 'photo' ? '#FFFFFF' : 'transparent',
+                      color: viewMode === 'photo' ? '#121212' : '#D4CDC5',
+                      border: 'none',
+                      padding: '4px 12px',
+                      borderRadius: '9999px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    8K Photo
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Play/Pause & Fullscreen Controls */}
