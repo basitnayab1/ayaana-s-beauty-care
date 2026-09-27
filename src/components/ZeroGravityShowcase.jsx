@@ -37,16 +37,6 @@ const ZERO_GRAVITY_SLIDES = [
     quote: 'Ultra-lightweight velvet cream for a flawless spotless glow.'
   },
   {
-    productId: '24k-gold-radiance-glow-serum',
-    image: '/assets/zero_gravity_gold_serum.jpg',
-    tag: '24K Pure Gold • Cellular Elixir',
-    title: '24K Gold Radiance Glow Serum',
-    subtitle: 'Weightless Liquid Gold & Collagen Synthesis',
-    highlight: 'Suspended 24K Flakes • Triple Hyaluronic • Vitamin C',
-    accentColor: '#D4AF37',
-    quote: 'Instant glass-skin sheen with genuine suspended 24K cosmetic gold.'
-  },
-  {
     productId: 'whitening-toner',
     image: '/assets/zero_gravity_whitening_toner.jpg',
     tag: 'Hydra-Mist • Zero Gravity Splash',
