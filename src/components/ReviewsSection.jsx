@@ -8,6 +8,14 @@ export default function ReviewsSection() {
   // Provided customer result images
   const customerProofImages = [
     {
+      src: '/assets/customer-proof.jpg',
+      alt: 'Ayaana Hand Whitening WhatsApp Customer Result - Before and After',
+      title: 'Hand & Feet Whitening Cream',
+      tag: '7-Day Real WhatsApp Proof',
+      customer: 'Ayaana Customer (Verified WhatsApp, Lahore)',
+      comment: '“Se boht zyada bright howy n 😊 Mai apko before and after ke picture bi send krti hu abi 🤗 Hands aur face par itna natural glow aya hai, dark knuckles bilkul fade ho gaye!”'
+    },
+    {
       src: '/assets/review_customer_1.jpg',
       alt: 'Ayaana Hand & Feet Whitening Cream Customer Result',
       title: 'Hand & Feet Whitening Cream',

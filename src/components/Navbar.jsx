@@ -94,6 +94,13 @@ export default function Navbar({ onCategorySelect, onScrollToSection }) {
             Skin Repair
           </button>
           <button
+            onClick={() => onScrollToSection('before-after')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13.5px', fontWeight: 600, color: '#736C65', letterSpacing: '0.02em', transition: 'var(--transition-smooth)' }}
+            className="nav-link"
+          >
+            Real Results
+          </button>
+          <button
             onClick={() => onScrollToSection('reviews')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13.5px', fontWeight: 600, color: '#736C65', letterSpacing: '0.02em', transition: 'var(--transition-smooth)' }}
             className="nav-link"
@@ -522,6 +529,15 @@ export default function Navbar({ onCategorySelect, onScrollToSection }) {
                 style={{ background: 'none', border: 'none', textAlign: 'left', fontSize: '16px', fontWeight: 600, color: '#2E2B28', cursor: 'pointer' }}
               >
                 Hand & Foot Brightening
+              </button>
+              <button
+                onClick={() => {
+                  onScrollToSection('before-after');
+                  setIsMobileMenuOpen(false);
+                }}
+                style={{ background: 'none', border: 'none', textAlign: 'left', fontSize: '16px', fontWeight: 600, color: '#C75678', cursor: 'pointer' }}
+              >
+                Real Before & After Results
               </button>
               <button
                 onClick={() => {

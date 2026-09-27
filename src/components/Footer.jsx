@@ -142,10 +142,10 @@ export default function Footer({ onCategorySelect, onScrollToSection }) {
               </li>
               <li>
                 <button
-                  onClick={() => onScrollToSection('reviews')}
+                  onClick={() => onScrollToSection('before-after')}
                   style={{ background: 'none', border: 'none', color: '#A89F95', cursor: 'pointer', textAlign: 'left' }}
                 >
-                  Customer Reviews & Feedback
+                  Real Before & After Proof
                 </button>
               </li>
               <li>
