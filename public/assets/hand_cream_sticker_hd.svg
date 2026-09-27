@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <radialGradient id="porcelainGlow" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="85%" stop-color="#FFFDF9" />
+      <stop offset="100%" stop-color="#FCEEF2" />
+    </radialGradient>
+    <linearGradient id="roseGoldRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F2C4CE" />
+      <stop offset="50%" stop-color="#E2A2B0" />
+      <stop offset="100%" stop-color="#C75678" />
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Rose Gold Border -->
+  <circle cx="512" cy="512" r="500" fill="url(#porcelainGlow)" stroke="url(#roseGoldRing)" stroke-width="16" />
+
+  <!-- Inner Delicate Accent Ring -->
+  <circle cx="512" cy="512" r="476" fill="none" stroke="#E2A2B0" stroke-width="3" stroke-dasharray="8 6" opacity="0.8" />
+  <circle cx="512" cy="512" r="464" fill="none" stroke="#C75678" stroke-width="2" opacity="0.6" />
+
+  <!-- Authentic Ayaana Logo -->
+  <image href="/assets/logo.png" x="162" y="70" width="700" height="600" preserveAspectRatio="xMidYMid meet" />
+
+  <!-- Product Title & Typography -->
+  <g transform="translate(512, 750)" text-anchor="middle">
+    <!-- Line 1: HAND AND FEET -->
+    <text y="0" font-family="'Cinzel', 'Playfair Display', Georgia, serif" font-size="52" font-weight="900" fill="#1E1B19" letter-spacing="5">
+      HAND AND FEET
+    </text>
+
+    <!-- Line 2: WHITENING CREAM -->
+    <text y="62" font-family="'Montserrat', -apple-system, sans-serif" font-size="44" font-weight="800" fill="#C75678" letter-spacing="8">
+      WHITENING CREAM
+    </text>
+
+    <!-- Subtitle / Accent -->
+    <text y="112" font-family="'Montserrat', sans-serif" font-size="22" font-weight="700" fill="#A87A88" letter-spacing="4">
+      ✦ BIO-ACTIVE CELLULAR REPAIR ✦
+    </text>
+  </g>
+</svg>

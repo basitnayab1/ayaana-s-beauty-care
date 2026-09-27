@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   Zap
 } from 'lucide-react';
-import ThreeZeroGravityProduct from './ThreeZeroGravityProduct';
+import ZeroGravityCanvasEngine from './ZeroGravityCanvasEngine';
 
 const ZERO_GRAVITY_SLIDES = [
   {
@@ -356,7 +356,7 @@ export default function ZeroGravityShowcase() {
             transition: isPlaying ? 'transform 0.5s ease-out' : 'transform 0.15s ease-out'
           }}
         >
-          {/* Active 16:9 Background Layer */}
+          {/* Active 16:9 Zero-Gravity Master Design Layer (Original Crisp 8K Quality & Perfect Branding) */}
           <div
             key={currentIndex}
             style={{
@@ -364,7 +364,8 @@ export default function ZeroGravityShowcase() {
               inset: 0,
               width: '100%',
               height: '100%',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              animation: 'zeroGravityFloat 6s ease-in-out infinite'
             }}
           >
             <img
@@ -376,32 +377,20 @@ export default function ZeroGravityShowcase() {
                 objectFit: 'cover',
                 display: 'block',
                 animation: 'subtleScale 6s ease-out forwards',
-                filter: currentIndex === 0 && viewMode === '3d'
-                  ? 'brightness(0.28) blur(10px) contrast(1.15)'
-                  : 'brightness(1.02) contrast(1.02)',
-                transition: 'filter 0.5s ease'
+                filter: 'brightness(1.02) contrast(1.02)'
               }}
             />
           </div>
 
-          {/* Real-time 3D Zero-Gravity Product with 3D Particles for First Product */}
-          {currentIndex === 0 && viewMode === '3d' && (
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                zIndex: 6
+          {/* Real Moving 3D Zero-Gravity Particles (Three.js WebGL Engine) */}
+          {currentIndex === 0 && (
+            <ZeroGravityCanvasEngine
+              accentColor={currentSlide.accentColor}
+              onInteractChange={(interacting) => {
+                setIs3DInteracting(interacting);
+                if (interacting) setIsPlaying(false);
               }}
-            >
-              <ThreeZeroGravityProduct
-                onInteractChange={(interacting) => {
-                  setIs3DInteracting(interacting);
-                  if (interacting) setIsPlaying(false);
-                }}
-              />
-            </div>
+            />
           )}
 
           {/* Vignette & Cinematic Gradients */}
@@ -410,9 +399,9 @@ export default function ZeroGravityShowcase() {
               position: 'absolute',
               inset: 0,
               background:
-                'radial-gradient(ellipse at center, transparent 40%, rgba(5,4,3,0.55) 85%, rgba(5,4,3,0.9) 100%)',
+                'radial-gradient(ellipse at center, transparent 40%, rgba(5,4,3,0.5) 85%, rgba(5,4,3,0.85) 100%)',
               pointerEvents: 'none',
-              zIndex: 7
+              zIndex: 12
             }}
           />
           <div
@@ -422,9 +411,9 @@ export default function ZeroGravityShowcase() {
               left: 0,
               right: 0,
               height: '65%',
-              background: 'linear-gradient(to top, rgba(5,4,3,0.92) 0%, rgba(5,4,3,0.4) 60%, transparent 100%)',
+              background: 'linear-gradient(to top, rgba(5,4,3,0.92) 0%, rgba(5,4,3,0.35) 60%, transparent 100%)',
               pointerEvents: 'none',
-              zIndex: 7
+              zIndex: 12
             }}
           />
 
@@ -438,10 +427,10 @@ export default function ZeroGravityShowcase() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              zIndex: 20
+              zIndex: 25
             }}
           >
-            {/* Tag Badge & 3D Switcher */}
+            {/* Tag Badge */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <div
                 style={{
@@ -471,54 +460,24 @@ export default function ZeroGravityShowcase() {
                 <span>{currentSlide.tag}</span>
               </div>
 
-              {/* 3D vs 8K Photo Toggle for First Product */}
               {currentIndex === 0 && (
                 <div
                   style={{
-                    display: 'flex',
-                    background: 'rgba(18, 18, 18, 0.85)',
-                    padding: '3px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    backgroundColor: 'rgba(18, 18, 18, 0.85)',
+                    border: '1px solid rgba(226, 130, 159, 0.45)',
+                    color: '#E2829F',
+                    padding: '5px 12px',
                     borderRadius: '9999px',
-                    border: '1px solid rgba(226, 130, 159, 0.4)',
-                    backdropFilter: 'blur(12px)',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.4)'
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    backdropFilter: 'blur(12px)'
                   }}
                 >
-                  <button
-                    onClick={() => setViewMode('3d')}
-                    style={{
-                      background: viewMode === '3d' ? 'linear-gradient(135deg, #E2829F, #C75678)' : 'transparent',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      padding: '4px 12px',
-                      borderRadius: '9999px',
-                      fontSize: '11px',
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      boxShadow: viewMode === '3d' ? '0 2px 8px rgba(199, 86, 120, 0.4)' : 'none'
-                    }}
-                  >
-                    <Sparkles style={{ width: '12px', height: '12px' }} />
-                    <span>3D 0-Gravity</span>
-                  </button>
-                  <button
-                    onClick={() => setViewMode('photo')}
-                    style={{
-                      background: viewMode === 'photo' ? '#FFFFFF' : 'transparent',
-                      color: viewMode === 'photo' ? '#121212' : '#D4CDC5',
-                      border: 'none',
-                      padding: '4px 12px',
-                      borderRadius: '9999px',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    8K Photo
-                  </button>
+                  <Sparkles style={{ width: '12px', height: '12px' }} />
+                  <span>3D Zero-G Particles Active</span>
                 </div>
               )}
             </div>
