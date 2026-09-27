@@ -6,12 +6,23 @@ const ShopContext = createContext();
 
 const DELETED_PRODUCTS_KEY = 'ayaana_deleted_product_ids';
 
+export const DEPRECATED_PRODUCT_IDS = new Set([
+  'hand-foot-whitening-repair-complex',
+  'miracle-glow-night-balm',
+  'triple-hyaluronic-plumping-serum',
+  'velvet-saffron-glow-body-treatment',
+  'rose-damascena-clarifying-cleanser',
+  'herbal-whitening-radiance-toner',
+  'radiance-skin-repair-cream'
+]);
+
 export function getDeletedProductIds() {
   try {
     const raw = localStorage.getItem(DELETED_PRODUCTS_KEY);
-    return raw ? new Set(JSON.parse(raw)) : new Set();
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set([...parsed, ...DEPRECATED_PRODUCT_IDS]);
   } catch {
-    return new Set();
+    return new Set(DEPRECATED_PRODUCT_IDS);
   }
 }
 
@@ -31,28 +42,28 @@ export function ShopProvider({ children }) {
     const saved = localStorage.getItem('ayaana_products');
 
     if (!saved) {
-      return PRODUCTS.filter((p) => !deletedIds.has(p.id));
+      return PRODUCTS.filter((p) => !deletedIds.has(p.id) && !DEPRECATED_PRODUCT_IDS.has(p.id));
     }
 
     try {
       const parsed = JSON.parse(saved);
-      // Clean up deprecated placeholder toner & placeholder radiance cream if present, AND any deleted IDs
+      // Clean up deprecated template items if present, AND any deleted IDs
       const cleaned = parsed.filter(
-        (p) =>
-          p.id !== 'herbal-whitening-radiance-toner' &&
-          p.id !== 'radiance-skin-repair-cream' &&
-          !deletedIds.has(p.id)
+        (p) => !DEPRECATED_PRODUCT_IDS.has(p.id) && !deletedIds.has(p.id)
       );
 
       // Only import new official products if they were NEVER deleted by the admin
       const existingIds = new Set(cleaned.map((p) => p.id));
       const missingFromOfficial = PRODUCTS.filter(
-        (p) => !existingIds.has(p.id) && !deletedIds.has(p.id)
+        (p) => !existingIds.has(p.id) && !deletedIds.has(p.id) && !DEPRECATED_PRODUCT_IDS.has(p.id)
       );
 
-      return [...cleaned, ...missingFromOfficial];
+      const finalProducts = [...cleaned, ...missingFromOfficial];
+      // Immediately scrub old cached template products from localStorage
+      localStorage.setItem('ayaana_products', JSON.stringify(finalProducts));
+      return finalProducts;
     } catch {
-      return PRODUCTS.filter((p) => !deletedIds.has(p.id));
+      return PRODUCTS.filter((p) => !deletedIds.has(p.id) && !DEPRECATED_PRODUCT_IDS.has(p.id));
     }
   });
 
