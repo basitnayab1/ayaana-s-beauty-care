@@ -6,7 +6,6 @@ import BrandValues from './components/BrandValues';
 import Marquee3D from './components/Marquee3D';
 import CategoryFilter from './components/CategoryFilter';
 import ProductCard from './components/ProductCard';
-import BeforeAfterSection from './components/BeforeAfterSection';
 import ProductSpotlight from './components/ProductSpotlight';
 import RitualGuide from './components/RitualGuide';
 import ReviewsSection from './components/ReviewsSection';
@@ -229,9 +228,6 @@ function MainStore() {
             </div>
           </div>
         </section>
-
-        {/* 8. Real Before & After Slider (Verified WhatsApp Proof) */}
-        <BeforeAfterSection />
 
         {/* 9. 3D Product Spotlight & Ingredient Science */}
         <ProductSpotlight />
