@@ -296,31 +296,34 @@ export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogS
           {/* Owner / Admin Protected Access Button */}
           <button
             onClick={() => setIsAdminOpen(true)}
-            className="desktop-only-admin-btn"
+            className="admin-login-btn"
             style={{
               background: isAdminLoggedIn ? '#121212' : 'var(--bg-card)',
-              border: isAdminLoggedIn ? '1px solid #E2829F' : '1px solid var(--border-card)',
-              color: isAdminLoggedIn ? '#E2829F' : '#736C65',
+              border: isAdminLoggedIn ? '1.5px solid #E2829F' : '1px solid var(--border-card)',
+              color: isAdminLoggedIn ? '#E2829F' : '#121212',
               cursor: 'pointer',
-              padding: isAdminLoggedIn ? '6px 12px' : '8px',
+              padding: isAdminLoggedIn ? '6px 12px' : '7px 10px',
               borderRadius: '9999px',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
               fontSize: '11px',
               fontWeight: 700,
-              transition: 'all 0.2s'
+              boxShadow: 'var(--shadow-sm)',
+              transition: 'all 0.2s',
+              flexShrink: 0
             }}
             title={isAdminLoggedIn ? "Open Owner Dashboard (Logged In)" : "Owner / Admin Login"}
+            aria-label="Owner Login"
           >
             {isAdminLoggedIn ? (
               <>
-                <Unlock style={{ width: '13px', height: '13px', color: '#E2829F' }} />
-                <span>Owner Mode</span>
+                <Unlock style={{ width: '14px', height: '14px', color: '#E2829F' }} />
+                <span className="owner-login-text">Owner Mode</span>
               </>
             ) : (
               <>
-                <Lock style={{ width: '14px', height: '14px' }} />
+                <Lock style={{ width: '14px', height: '14px', color: '#121212' }} />
                 <span className="owner-login-text">Login</span>
               </>
             )}
@@ -601,6 +604,53 @@ export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogS
               </div>
             </div>
 
+            {/* Quick Owner / Admin Access Card in Mobile Drawer */}
+            <div style={{ marginBottom: '16px' }}>
+              <button
+                onClick={() => {
+                  setIsAdminOpen(true);
+                  setIsMobileMenuOpen(false);
+                }}
+                style={{
+                  width: '100%',
+                  background: isAdminLoggedIn ? '#121212' : '#FFFFFF',
+                  color: isAdminLoggedIn ? '#FFFFFF' : '#121212',
+                  border: isAdminLoggedIn ? '1.5px solid #128C7E' : '1.5px solid rgba(18, 18, 18, 0.12)',
+                  borderRadius: '12px',
+                  padding: '10px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {isAdminLoggedIn ? (
+                    <Unlock style={{ width: '16px', height: '16px', color: '#128C7E' }} />
+                  ) : (
+                    <Lock style={{ width: '16px', height: '16px', color: '#C75678' }} />
+                  )}
+                  <span>{isAdminLoggedIn ? "Owner Dashboard (Active)" : "Owner / Admin Login"}</span>
+                </div>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    background: isAdminLoggedIn ? '#128C7E' : 'rgba(199, 86, 120, 0.12)',
+                    color: isAdminLoggedIn ? '#FFFFFF' : '#C75678',
+                    padding: '2px 8px',
+                    borderRadius: '999px',
+                    fontWeight: 700
+                  }}
+                >
+                  {isAdminLoggedIn ? "Manage" : "Sign In"}
+                </span>
+              </button>
+            </div>
+
             {/* Links */}
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, overflowY: 'auto' }}>
               <button
@@ -715,8 +765,10 @@ export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogS
         }
         @media (max-width: 640px) {
           .cart-text { display: none !important; }
-          .desktop-only-admin-btn { display: none !important; }
           .announcement-divider { display: none !important; }
+          .admin-login-btn {
+            padding: 7px !important;
+          }
         }
         @media (max-width: 440px) {
           .currency-switcher-nav { display: none !important; }
