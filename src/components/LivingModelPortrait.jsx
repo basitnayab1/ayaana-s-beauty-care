@@ -163,6 +163,8 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
         <img
           src="/assets/hero_model_luxury.jpg"
           alt="Ayaana's Radiant Skincare Editorial Model"
+          fetchPriority="high"
+          decoding="async"
           style={{
             position: 'absolute',
             inset: 0,
@@ -180,6 +182,7 @@ export default function LivingModelPortrait({ hotspots = [], activeSpot, setActi
           src="/assets/hero_model_blink.jpg"
           alt=""
           aria-hidden="true"
+          decoding="async"
           style={{
             position: 'absolute',
             inset: 0,

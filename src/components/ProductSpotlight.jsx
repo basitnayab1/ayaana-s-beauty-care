@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
-import ThreeProductViewer from './ThreeProductViewer';
 import { Sparkles, ShoppingBag, MessageCircle, Star } from 'lucide-react';
+
+const ThreeProductViewer = React.lazy(() => import('./ThreeProductViewer'));
 
 export default function ProductSpotlight() {
   const { products, addToCart, setActiveProduct, formatPrice, generateSingleProductWhatsAppUrl } = useShop();
@@ -70,10 +71,28 @@ export default function ProductSpotlight() {
                   borderRadius: '24px',
                   padding: '20px',
                   boxShadow: 'var(--shadow-md)',
-                  position: 'relative'
+                  position: 'relative',
+                  minHeight: '340px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
-                <ThreeProductViewer productName={heroProduct.name} />
+                <React.Suspense
+                  fallback={
+                    <div style={{ height: '320px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img
+                        src={heroProduct.image}
+                        alt={heroProduct.name}
+                        loading="lazy"
+                        decoding="async"
+                        style={{ maxHeight: '240px', maxWidth: '85%', objectFit: 'contain' }}
+                      />
+                    </div>
+                  }
+                >
+                  <ThreeProductViewer productName={heroProduct.name} />
+                </React.Suspense>
               </div>
             </div>
 

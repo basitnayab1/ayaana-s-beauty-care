@@ -13,7 +13,9 @@ import {
   CheckCircle2,
   Zap
 } from 'lucide-react';
-import ZeroGravityCanvasEngine from './ZeroGravityCanvasEngine';
+
+// Lazy-load 3D particle engine so showcase theater renders immediately
+const ZeroGravityCanvasEngine = React.lazy(() => import('./ZeroGravityCanvasEngine'));
 
 const ZERO_GRAVITY_SLIDES = [
   {
@@ -501,6 +503,7 @@ export default function ZeroGravityShowcase() {
             <img
               src={currentSlide.image}
               alt={currentSlide.title}
+              decoding="async"
               style={{
                 width: '100%',
                 height: '100%',
@@ -514,13 +517,15 @@ export default function ZeroGravityShowcase() {
 
           {/* Real Moving 3D Zero-Gravity Particles (Three.js WebGL Engine) */}
           {currentIndex === 0 && (
-            <ZeroGravityCanvasEngine
-              accentColor={currentSlide.accentColor}
-              onInteractChange={(interacting) => {
-                setIs3DInteracting(interacting);
-                if (interacting) setIsPlaying(false);
-              }}
-            />
+            <React.Suspense fallback={null}>
+              <ZeroGravityCanvasEngine
+                accentColor={currentSlide.accentColor}
+                onInteractChange={(interacting) => {
+                  setIs3DInteracting(interacting);
+                  if (interacting) setIsPlaying(false);
+                }}
+              />
+            </React.Suspense>
           )}
 
           {/* Vignette & Cinematic Gradients */}

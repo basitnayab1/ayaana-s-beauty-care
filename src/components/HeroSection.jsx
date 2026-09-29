@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
-import ThreeHeroJar from './ThreeHeroJar';
-import ThreeProductViewer from './ThreeProductViewer';
 import Tilt3DCard from './Tilt3DCard';
 import LivingModelPortrait from './LivingModelPortrait';
+
+// Code-split heavy 3D WebGL viewers so the hero section renders instantly
+const ThreeHeroJar = React.lazy(() => import('./ThreeHeroJar'));
+const ThreeProductViewer = React.lazy(() => import('./ThreeProductViewer'));
 import { ArrowUpRight, Sparkles, MessageCircle, Droplets } from 'lucide-react';
 import { BRAND_CONFIG } from '../data/products';
 
@@ -224,21 +226,35 @@ export default function HeroSection({ onShopNowClick }) {
 
             {/* 3D Interactive Three.js Product Canvas (Dynamic matching active product) */}
             <div style={{ position: 'relative', width: '100%', margin: '4px 0', zIndex: 1 }}>
-              {activeModelType === 'natural-glow-mask' ? (
-                <div style={{ height: '360px', width: '100%' }}>
-                  <ThreeProductViewer productName="Natural Glow Mask" />
-                </div>
-              ) : activeModelType === 'face-whitening-cream' ? (
-                <div style={{ height: '360px', width: '100%' }}>
-                  <ThreeProductViewer productName="Face Whitening Cream" />
-                </div>
-              ) : activeModelType === 'toner' ? (
-                <div style={{ height: '360px', width: '100%' }}>
-                  <ThreeProductViewer productName="Herbal Whitening Radiance Toner" />
-                </div>
-              ) : (
-                <ThreeHeroJar />
-              )}
+              <React.Suspense
+                fallback={
+                  <div style={{ height: '360px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img
+                      src={heroProduct.image}
+                      alt={heroProduct.name}
+                      style={{ maxHeight: '280px', maxWidth: '85%', objectFit: 'contain', filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.12))' }}
+                      fetchPriority="high"
+                      decoding="async"
+                    />
+                  </div>
+                }
+              >
+                {activeModelType === 'natural-glow-mask' ? (
+                  <div style={{ height: '360px', width: '100%' }}>
+                    <ThreeProductViewer productName="Natural Glow Mask" />
+                  </div>
+                ) : activeModelType === 'face-whitening-cream' ? (
+                  <div style={{ height: '360px', width: '100%' }}>
+                    <ThreeProductViewer productName="Face Whitening Cream" />
+                  </div>
+                ) : activeModelType === 'toner' ? (
+                  <div style={{ height: '360px', width: '100%' }}>
+                    <ThreeProductViewer productName="Herbal Whitening Radiance Toner" />
+                  </div>
+                ) : (
+                  <ThreeHeroJar />
+                )}
+              </React.Suspense>
 
               {/* Floating 3D Ingredient Badges Around 3D Jar */}
               <div

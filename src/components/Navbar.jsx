@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { BRAND_CONFIG } from '../data/products';
 
-export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogSearch }) {
+export default function Navbar({ onCategorySelect, onScrollToSection }) {
   const {
     totalCartCount,
     wishlist,
@@ -26,46 +26,23 @@ export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogS
     setIsTrackingOpen,
     setIsAdminOpen,
     isAdminLoggedIn,
-    products,
-    formatPrice,
-    setActiveProduct,
-    addToCart
+    products
   } = useShop();
+
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Robust, safe filtered search results
-  const q = searchQuery.trim().toLowerCase();
-  const searchResults = q
-    ? products.filter((p) => {
-        const name = (p.name || '').toLowerCase();
-        const tagline = (p.tagline || '').toLowerCase();
-        const categoryName = (p.categoryName || '').toLowerCase();
-        const category = (p.category || '').toLowerCase();
-        const desc = (p.description || '').toLowerCase();
-        const ingredients = (p.ingredients || '').toLowerCase();
-
-        return (
-          name.includes(q) ||
-          tagline.includes(q) ||
-          categoryName.includes(q) ||
-          category.includes(q) ||
-          desc.includes(q) ||
-          ingredients.includes(q)
-        );
-      })
+  // Filtered search results
+  const searchResults = searchQuery.trim()
+    ? products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.categoryName.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     : [];
-
-  const handleSearchSubmit = (e) => {
-    if (e) e.preventDefault();
-    if (onCatalogSearch && searchQuery.trim()) {
-      onCatalogSearch(searchQuery.trim());
-      setIsSearchOpen(false);
-      setIsMobileMenuOpen(false);
-    }
-  };
 
   return (
     <header style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(253, 251, 247, 0.95)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(18, 18, 18, 0.06)' }}>
@@ -296,34 +273,31 @@ export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogS
           {/* Owner / Admin Protected Access Button */}
           <button
             onClick={() => setIsAdminOpen(true)}
-            className="admin-login-btn"
+            className="desktop-only-admin-btn"
             style={{
               background: isAdminLoggedIn ? '#121212' : 'var(--bg-card)',
-              border: isAdminLoggedIn ? '1.5px solid #E2829F' : '1px solid var(--border-card)',
-              color: isAdminLoggedIn ? '#E2829F' : '#121212',
+              border: isAdminLoggedIn ? '1px solid #E2829F' : '1px solid var(--border-card)',
+              color: isAdminLoggedIn ? '#E2829F' : '#736C65',
               cursor: 'pointer',
-              padding: isAdminLoggedIn ? '6px 12px' : '7px 10px',
+              padding: isAdminLoggedIn ? '6px 12px' : '8px',
               borderRadius: '9999px',
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
               fontSize: '11px',
               fontWeight: 700,
-              boxShadow: 'var(--shadow-sm)',
-              transition: 'all 0.2s',
-              flexShrink: 0
+              transition: 'all 0.2s'
             }}
             title={isAdminLoggedIn ? "Open Owner Dashboard (Logged In)" : "Owner / Admin Login"}
-            aria-label="Owner Login"
           >
             {isAdminLoggedIn ? (
               <>
-                <Unlock style={{ width: '14px', height: '14px', color: '#E2829F' }} />
-                <span className="owner-login-text">Owner Mode</span>
+                <Unlock style={{ width: '13px', height: '13px', color: '#E2829F' }} />
+                <span>Owner Mode</span>
               </>
             ) : (
               <>
-                <Lock style={{ width: '14px', height: '14px', color: '#121212' }} />
+                <Lock style={{ width: '14px', height: '14px' }} />
                 <span className="owner-login-text">Login</span>
               </>
             )}
@@ -342,16 +316,13 @@ export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogS
           }}
         >
           <div className="container">
-            <form
-              onSubmit={handleSearchSubmit}
-              style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-card)', padding: '8px 16px', borderRadius: '9999px', border: '1px solid var(--border-card)' }}
-            >
-              <Search style={{ width: '18px', height: '18px', color: '#736C65', flexShrink: 0 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-card)', padding: '10px 18px', borderRadius: '9999px' }}>
+              <Search style={{ width: '18px', height: '18px', color: '#736C65' }} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products by name, concern, or ingredient (e.g. shampoo, cream, toner)..."
+                placeholder="Search products by name, concern, or category..."
                 autoFocus
                 style={{
                   background: 'none',
@@ -365,31 +336,19 @@ export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogS
               />
               {searchQuery && (
                 <button
-                  type="button"
                   onClick={() => setSearchQuery('')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#736C65', padding: '4px', display: 'flex', alignItems: 'center' }}
-                  title="Clear search"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#736C65', padding: '2px' }}
                 >
                   <X style={{ width: '16px', height: '16px' }} />
                 </button>
               )}
-              {searchQuery && (
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  style={{ padding: '6px 14px', fontSize: '12px', fontWeight: 700, borderRadius: '9999px', flexShrink: 0 }}
-                >
-                  Search
-                </button>
-              )}
               <button
-                type="button"
                 onClick={() => setIsSearchOpen(false)}
-                style={{ background: '#121212', color: '#FFFFFF', border: 'none', borderRadius: '9999px', padding: '6px 14px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}
+                style={{ background: '#121212', color: '#FFFFFF', border: 'none', borderRadius: '9999px', padding: '6px 14px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
               >
                 Close
               </button>
-            </form>
+            </div>
 
             {/* Instant Search Results Dropdown */}
             {searchQuery && (
@@ -399,102 +358,51 @@ export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogS
                   background: '#FFFFFF',
                   borderRadius: '16px',
                   border: '1px solid var(--border-card)',
-                  padding: '14px',
-                  maxHeight: '380px',
-                  overflowY: 'auto',
-                  boxShadow: 'var(--shadow-sm)'
+                  padding: '12px',
+                  maxHeight: '340px',
+                  overflowY: 'auto'
                 }}
               >
                 {searchResults.length > 0 ? (
-                  <>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '10px' }}>
-                      {searchResults.map((item) => (
-                        <div
-                          key={item.id}
-                          onClick={() => {
-                            setActiveProduct(item);
-                            setIsSearchOpen(false);
-                          }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '12px',
-                            padding: '10px 12px',
-                            borderRadius: '12px',
-                            cursor: 'pointer',
-                            background: 'var(--bg-surface)',
-                            border: '1px solid rgba(18, 18, 18, 0.05)',
-                            transition: 'all 0.2s'
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              style={{ width: '46px', height: '46px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0 }}
-                            />
-                            <div style={{ minWidth: 0, flex: 1 }}>
-                              <div style={{ fontSize: '10px', textTransform: 'uppercase', color: '#C75678', fontWeight: 700, letterSpacing: '0.04em' }}>
-                                {item.categoryName || 'Botanical'}
-                              </div>
-                              <h4 style={{ fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: '1px 0' }}>
-                                {item.name}
-                              </h4>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <span style={{ fontSize: '12px', color: '#121212', fontWeight: 800 }}>
-                                  {formatPrice(item.pricePKR, item.priceUSD)}
-                                </span>
-                                {item.volume && <span style={{ fontSize: '10.5px', color: '#736C65' }}>• {item.volume}</span>}
-                              </div>
-                            </div>
-                          </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => {
-                                addToCart(item);
-                                setIsCartOpen(true);
-                                setIsSearchOpen(false);
-                              }}
-                              className="btn-primary"
-                              style={{ padding: '6px 12px', fontSize: '11px', borderRadius: '8px' }}
-                              title="Add to bag"
-                            >
-                              Add
-                            </button>
-                            <ArrowRight style={{ width: '14px', height: '14px', color: '#736C65' }} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '12px', borderTop: '1px solid var(--border-card)', marginTop: '12px' }}>
-                      <button
-                        type="button"
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '10px' }}>
+                    {searchResults.map((item) => (
+                      <div
+                        key={item.id}
                         onClick={() => {
-                          if (onCatalogSearch) onCatalogSearch(searchQuery);
+                          setActiveProduct(item);
                           setIsSearchOpen(false);
                         }}
                         style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#C75678',
-                          fontSize: '12.5px',
-                          fontWeight: 700,
-                          cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '6px'
+                          gap: '12px',
+                          padding: '8px',
+                          borderRadius: '10px',
+                          cursor: 'pointer',
+                          background: 'var(--bg-surface)',
+                          transition: 'background 0.2s'
                         }}
                       >
-                        <span>View all {searchResults.length} formulations in Collection</span>
-                        <ArrowRight style={{ width: '14px', height: '14px' }} />
-                      </button>
-                    </div>
-                  </>
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'cover' }}
+                        />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <h4 style={{ fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.name}
+                          </h4>
+                          <span style={{ fontSize: '11.5px', color: '#C75678', fontWeight: 600 }}>
+                            {formatPrice(item.pricePKR, item.priceUSD)}
+                          </span>
+                        </div>
+                        <ArrowRight style={{ width: '14px', height: '14px', color: '#736C65' }} />
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   <div style={{ padding: '24px', textAlign: 'center', color: '#736C65', fontSize: '14px' }}>
-                    No products found matching "{searchQuery}". Try "cream", "shampoo", "oil", or "whitening".
+                    No products found matching "{searchQuery}". Try "cream", "toner", or "serum".
                   </div>
                 )}
               </div>
@@ -525,7 +433,7 @@ export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogS
             }}
           >
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', paddingBottom: '14px', borderBottom: '1px solid rgba(18, 18, 18, 0.08)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid rgba(18, 18, 18, 0.08)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <img src="/assets/logo.png" alt="Ayaana's" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
                 <span style={{ fontWeight: 800, fontSize: '18px' }}>Ayaana’s</span>
@@ -537,35 +445,6 @@ export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogS
                 <X style={{ width: '20px', height: '20px' }} />
               </button>
             </div>
-
-            {/* Mobile Drawer Search Bar */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (onCatalogSearch && searchQuery.trim()) {
-                  onCatalogSearch(searchQuery.trim());
-                  setIsMobileMenuOpen(false);
-                }
-              }}
-              style={{ position: 'relative', marginBottom: '16px' }}
-            >
-              <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', width: '16px', height: '16px', color: '#736C65' }} />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                style={{
-                  width: '100%',
-                  padding: '9px 12px 9px 36px',
-                  borderRadius: '10px',
-                  border: '1px solid rgba(18, 18, 18, 0.12)',
-                  fontSize: '13px',
-                  backgroundColor: 'var(--bg-card)',
-                  outline: 'none'
-                }}
-              />
-            </form>
 
             {/* Currency Switcher in Drawer for Mobile Users */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', padding: '10px 14px', background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border-card)' }}>
@@ -602,53 +481,6 @@ export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogS
                   USD $
                 </button>
               </div>
-            </div>
-
-            {/* Quick Owner / Admin Access Card in Mobile Drawer */}
-            <div style={{ marginBottom: '16px' }}>
-              <button
-                onClick={() => {
-                  setIsAdminOpen(true);
-                  setIsMobileMenuOpen(false);
-                }}
-                style={{
-                  width: '100%',
-                  background: isAdminLoggedIn ? '#121212' : '#FFFFFF',
-                  color: isAdminLoggedIn ? '#FFFFFF' : '#121212',
-                  border: isAdminLoggedIn ? '1.5px solid #128C7E' : '1.5px solid rgba(18, 18, 18, 0.12)',
-                  borderRadius: '12px',
-                  padding: '10px 14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '13px',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {isAdminLoggedIn ? (
-                    <Unlock style={{ width: '16px', height: '16px', color: '#128C7E' }} />
-                  ) : (
-                    <Lock style={{ width: '16px', height: '16px', color: '#C75678' }} />
-                  )}
-                  <span>{isAdminLoggedIn ? "Owner Dashboard (Active)" : "Owner / Admin Login"}</span>
-                </div>
-                <span
-                  style={{
-                    fontSize: '11px',
-                    background: isAdminLoggedIn ? '#128C7E' : 'rgba(199, 86, 120, 0.12)',
-                    color: isAdminLoggedIn ? '#FFFFFF' : '#C75678',
-                    padding: '2px 8px',
-                    borderRadius: '999px',
-                    fontWeight: 700
-                  }}
-                >
-                  {isAdminLoggedIn ? "Manage" : "Sign In"}
-                </span>
-              </button>
             </div>
 
             {/* Links */}
@@ -765,10 +597,8 @@ export default function Navbar({ onCategorySelect, onScrollToSection, onCatalogS
         }
         @media (max-width: 640px) {
           .cart-text { display: none !important; }
+          .desktop-only-admin-btn { display: none !important; }
           .announcement-divider { display: none !important; }
-          .admin-login-btn {
-            padding: 7px !important;
-          }
         }
         @media (max-width: 440px) {
           .currency-switcher-nav { display: none !important; }

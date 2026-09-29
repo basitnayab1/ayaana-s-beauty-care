@@ -8,6 +8,11 @@ export default function ThreeBackground() {
     const container = canvasRef.current;
     if (!container) return;
 
+    // Skip heavy 3D canvas on mobile devices or touch screens to guarantee 60fps scrolling and fast load
+    if (window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches) {
+      return;
+    }
+
     let width = window.innerWidth;
     let height = window.innerHeight;
 

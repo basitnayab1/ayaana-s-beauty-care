@@ -15,17 +15,17 @@ import WhatsAppBanner from './components/WhatsAppBanner';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import WishlistDrawer from './components/WishlistDrawer';
-import ProductModal from './components/ProductModal';
-import ModelRoutineModal from './components/ModelRoutineModal';
 import CustomCursor from './components/CustomCursor';
-import ThreeBackground from './components/ThreeBackground';
 import { MessageCircle, Sparkles, GripVertical, Search, X } from 'lucide-react';
 import { BRAND_CONFIG } from './data/products';
 
-// Code-split heavy modals to keep initial bundle ultra light on mobile
+// Code-split heavy modals, 3D viewers & background to keep initial bundle ultra light
 const CheckoutModal = React.lazy(() => import('./components/CheckoutModal'));
 const OrderTrackingModal = React.lazy(() => import('./components/OrderTrackingModal'));
 const AdminModal = React.lazy(() => import('./components/AdminModal'));
+const ProductModal = React.lazy(() => import('./components/ProductModal'));
+const ModelRoutineModal = React.lazy(() => import('./components/ModelRoutineModal'));
+const ThreeBackground = React.lazy(() => import('./components/ThreeBackground'));
 
 
 function MainStore() {
@@ -85,8 +85,10 @@ function MainStore() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-      {/* 1. Interactive 3D WebGL Particle Background */}
-      <ThreeBackground />
+      {/* 1. Interactive 3D WebGL Particle Background (Desktop Only, Lazy-Loaded) */}
+      <React.Suspense fallback={null}>
+        <ThreeBackground />
+      </React.Suspense>
 
       {/* 2. Custom Luxury 3D Cursor & Glowing Aura */}
       <CustomCursor />
@@ -440,12 +442,12 @@ function MainStore() {
         <MessageCircle style={{ width: '28px', height: '28px' }} />
       </a>
 
-      {/* Drawers & Modals */}
+      {/* Drawers & Modals (Code-Split & Lazy Loaded) */}
       <CartDrawer />
       <WishlistDrawer />
-      <ProductModal />
-      <ModelRoutineModal />
       <React.Suspense fallback={null}>
+        <ProductModal />
+        <ModelRoutineModal />
         <CheckoutModal />
         <OrderTrackingModal />
         <AdminModal />
