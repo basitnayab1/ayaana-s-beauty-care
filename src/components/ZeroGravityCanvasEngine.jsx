@@ -478,18 +478,49 @@ export default function ZeroGravityCanvasEngine({
         cursor: 'pointer'
       }}
     >
-      {/* Floating Control Badges on Top */}
+      <style>{`
+        .zg-canvas-top-controls {
+          position: absolute;
+          top: clamp(48px, 6vw, 56px);
+          left: clamp(14px, 2.5vw, 28px);
+          z-index: 30;
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          pointer-events: auto;
+        }
+        .zg-canvas-bottom-hint {
+          position: absolute;
+          bottom: clamp(75px, 12vw, 115px);
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: rgba(18, 18, 18, 0.72);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          color: #E8DFD8;
+          padding: 4px 14px;
+          border-radius: 9999px;
+          font-size: 11px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          pointer-events: none;
+          z-index: 20;
+        }
+        @media (max-width: 768px) {
+          .zg-canvas-top-controls {
+            display: none !important;
+          }
+          .zg-canvas-bottom-hint {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      {/* Floating Control Badges on Top (Desktop only, positioned under top bar) */}
       <div
-        style={{
-          position: 'absolute',
-          top: 'clamp(14px, 2.5vw, 22px)',
-          left: 'clamp(14px, 2.5vw, 28px)',
-          zIndex: 30,
-          display: 'flex',
-          gap: '8px',
-          flexWrap: 'wrap',
-          pointerEvents: 'auto'
-        }}
+        className="zg-canvas-top-controls"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Zero-G Pulse Button */}
@@ -503,7 +534,7 @@ export default function ZeroGravityCanvasEngine({
             border: '1px solid rgba(226, 130, 159, 0.5)',
             backdropFilter: 'blur(12px)',
             color: '#FFFFFF',
-            padding: '6px 14px',
+            padding: '5px 13px',
             borderRadius: '9999px',
             fontSize: '11px',
             fontWeight: 800,
@@ -513,7 +544,7 @@ export default function ZeroGravityCanvasEngine({
           }}
           title="Click to trigger zero-gravity kinetic shockwave"
         >
-          <Sparkles style={{ width: '13px', height: '13px', color: '#E2829F' }} />
+          <Sparkles style={{ width: '12px', height: '12px', color: '#E2829F' }} />
           <span>Zero-G Kinetic Pulse 💫</span>
         </button>
 
@@ -528,7 +559,7 @@ export default function ZeroGravityCanvasEngine({
             border: '1px solid rgba(255, 255, 255, 0.2)',
             backdropFilter: 'blur(12px)',
             color: '#FFFFFF',
-            padding: '6px 14px',
+            padding: '5px 13px',
             borderRadius: '9999px',
             fontSize: '11px',
             fontWeight: 700,
@@ -537,33 +568,13 @@ export default function ZeroGravityCanvasEngine({
           }}
           title="Toggle zero-gravity particle speed"
         >
-          <Wind style={{ width: '13px', height: '13px', color: '#BFE6F5' }} />
+          <Wind style={{ width: '12px', height: '12px', color: '#BFE6F5' }} />
           <span>{particleSpeedMode === 'gentle' ? 'Drift: Gentle Float' : 'Drift: Cosmic Swirl'}</span>
         </button>
       </div>
 
-      {/* Helper click hint */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 'clamp(85px, 14vw, 125px)',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: 'rgba(18, 18, 18, 0.72)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
-          color: '#E8DFD8',
-          padding: '4px 14px',
-          borderRadius: '9999px',
-          fontSize: '11px',
-          fontWeight: 600,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          pointerEvents: 'none',
-          zIndex: 20
-        }}
-      >
+      {/* Helper click hint (Desktop only) */}
+      <div className="zg-canvas-bottom-hint">
         <RotateCw style={{ width: '11px', height: '11px', color: '#E2829F' }} />
         <span>Move cursor to guide 3D particles • Click for Zero-G pulse</span>
       </div>

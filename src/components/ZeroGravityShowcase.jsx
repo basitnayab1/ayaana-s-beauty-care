@@ -92,6 +92,7 @@ export default function ZeroGravityShowcase() {
   const { products, formatPrice, setActiveProduct, addToCart, setIsCartOpen } = useShop();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [isUserPaused, setIsUserPaused] = useState(false);
   const [viewMode, setViewMode] = useState('3d'); // '3d' | 'photo'
   const [is3DInteracting, setIs3DInteracting] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -106,9 +107,8 @@ export default function ZeroGravityShowcase() {
   const currentSlide = ZERO_GRAVITY_SLIDES[currentIndex];
   const linkedProduct = products.find((p) => p.id === currentSlide.productId) || products[0];
 
-  // Auto-play timer (pauses when user is interacting with 3D Zero-G model)
+  // Auto-play timer (pauses when user is interacting with 3D Zero-G model or paused)
   useEffect(() => {
-    // If user is actively playing with the 3D model on slide 0, hold slide
     if (!isPlaying || (currentIndex === 0 && viewMode === '3d' && is3DInteracting)) {
       if (timerRef.current) clearInterval(timerRef.current);
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
@@ -132,7 +132,7 @@ export default function ZeroGravityShowcase() {
       if (timerRef.current) clearInterval(timerRef.current);
       if (progressTimerRef.current) clearInterval(progressTimerRef.current);
     };
-  }, [isPlaying, currentIndex]);
+  }, [isPlaying, currentIndex, is3DInteracting, viewMode]);
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % ZERO_GRAVITY_SLIDES.length);
@@ -144,6 +144,17 @@ export default function ZeroGravityShowcase() {
     setProgress(0);
   };
 
+  const togglePlayPause = (e) => {
+    if (e) e.stopPropagation();
+    if (isPlaying) {
+      setIsPlaying(false);
+      setIsUserPaused(true);
+    } else {
+      setIsPlaying(true);
+      setIsUserPaused(false);
+    }
+  };
+
   const handleAddToCart = (e) => {
     e.stopPropagation();
     if (linkedProduct) {
@@ -152,18 +163,26 @@ export default function ZeroGravityShowcase() {
     }
   };
 
-  // Subtle 3D mouse parallax
+  // Subtle 3D mouse parallax on desktop only
   const handleMouseMove = (e) => {
-    if (!showcaseRef.current) return;
+    if (window.innerWidth <= 768 || !showcaseRef.current) return;
     const rect = showcaseRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width - 0.5) * 14;
     const y = ((e.clientY - rect.top) / rect.height - 0.5) * 14;
     setMouseOffset({ x, y });
   };
 
+  const handleMouseEnter = () => {
+    if (window.innerWidth > 768) {
+      setIsPlaying(false);
+    }
+  };
+
   const handleMouseLeave = () => {
     setMouseOffset({ x: 0, y: 0 });
-    setIsPlaying(true);
+    if (!isUserPaused && window.innerWidth > 768) {
+      setIsPlaying(true);
+    }
   };
 
   // Mobile Touch Swipe Handling
@@ -171,7 +190,6 @@ export default function ZeroGravityShowcase() {
   const touchEndX = useRef(0);
 
   const handleTouchStart = (e) => {
-    setIsPlaying(false);
     if (e.touches && e.touches[0]) {
       touchStartX.current = e.touches[0].clientX;
       touchEndX.current = e.touches[0].clientX;
@@ -186,12 +204,15 @@ export default function ZeroGravityShowcase() {
 
   const handleTouchEnd = () => {
     const diff = touchStartX.current - touchEndX.current;
-    if (Math.abs(diff) > 40) {
+    if (Math.abs(diff) > 35) {
       if (diff > 0) {
         handleNext();
       } else {
         handlePrev();
       }
+    }
+    if (!isUserPaused) {
+      setIsPlaying(true);
     }
   };
 
@@ -233,6 +254,76 @@ export default function ZeroGravityShowcase() {
             transform: scale(1.08);
           }
         }
+
+        .zg-gradient-title {
+          display: inline-block;
+          background: linear-gradient(135deg, #FFFFFF 15%, var(--accent-color, #E2829F) 85%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          color: var(--accent-color, #E2829F);
+        }
+
+        .zg-theatre {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 16 / 9;
+          max-height: 740px;
+          border-radius: clamp(16px, 2.5vw, 28px);
+          overflow: hidden;
+          background-color: #050403;
+          box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(226, 130, 159, 0.12);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          touch-action: pan-y;
+        }
+
+        .zg-bottom-gradient {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 60%;
+          background: linear-gradient(to top, rgba(5,4,3,0.92) 0%, rgba(5,4,3,0.35) 60%, transparent 100%);
+          pointer-events: none;
+          z-index: 12;
+        }
+
+        .zg-desktop-overlay {
+          position: absolute;
+          bottom: clamp(14px, 2.5vw, 28px);
+          left: clamp(14px, 2.5vw, 28px);
+          right: clamp(14px, 2.5vw, 28px);
+          z-index: 15;
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 20px;
+          flex-wrap: wrap;
+          pointer-events: none;
+        }
+        .zg-desktop-overlay > * {
+          pointer-events: auto;
+        }
+
+        .zg-mobile-card {
+          display: none;
+        }
+
+        .zg-thumb-reel {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: clamp(8px, 1.5vw, 14px);
+          margin-top: 22px;
+          overflow-x: auto;
+          padding: 8px 4px;
+          scrollbar-width: none;
+          -webkit-overflow-scrolling: touch;
+        }
+        .zg-thumb-reel::-webkit-scrollbar {
+          display: none;
+        }
+
         .zg-thumb-btn {
           transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -242,6 +333,65 @@ export default function ZeroGravityShowcase() {
         .zg-action-btn:hover {
           transform: translateY(-2px);
           box-shadow: 0 8px 24px rgba(226, 130, 159, 0.35);
+        }
+
+        @media (max-width: 768px) {
+          #zero-gravity-showcase {
+            padding: 36px 0 50px 0 !important;
+          }
+
+          .zg-theatre {
+            aspect-ratio: 16 / 9 !important;
+            transform: none !important;
+            border-radius: 16px !important;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.85) !important;
+          }
+
+          /* Hide inner overlay card on mobile so product visual is completely unobstructed */
+          .zg-desktop-overlay {
+            display: none !important;
+          }
+
+          /* Reduce dark bottom gradient so product image stays clear and brilliant */
+          .zg-bottom-gradient {
+            height: 20% !important;
+            background: linear-gradient(to top, rgba(5,4,3,0.5) 0%, transparent 100%) !important;
+          }
+
+          /* Show clean docked card below theatre */
+          .zg-mobile-card {
+            display: block !important;
+            margin-top: 14px;
+            background: rgba(18, 16, 15, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 18px;
+            padding: 16px 18px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+          }
+
+          /* Thumbnail reel aligns left and allows smooth touch scrolling */
+          .zg-thumb-reel {
+            justify-content: flex-start !important;
+            padding: 8px 10px !important;
+            margin-top: 16px !important;
+          }
+
+          .zg-arrow-btn {
+            width: 32px !important;
+            height: 32px !important;
+            background-color: rgba(18, 18, 18, 0.55) !important;
+          }
+
+          .zg-top-bar {
+            top: 10px !important;
+            left: 10px !important;
+            right: 10px !important;
+          }
+
+          .zg-particles-badge {
+            display: none !important;
+          }
         }
       `}</style>
 
@@ -290,19 +440,18 @@ export default function ZeroGravityShowcase() {
 
           <h2
             style={{
-              fontSize: 'clamp(26px, 4.2vw, 42px)',
+              fontSize: 'clamp(24px, 4.2vw, 42px)',
               fontWeight: 800,
               letterSpacing: '-0.03em',
-              lineHeight: 1.15,
+              lineHeight: 1.18,
               color: '#FFFFFF'
             }}
           >
             Weightless Botanicals in{' '}
             <span
+              className="zg-gradient-title"
               style={{
-                background: `linear-gradient(135deg, #FFFFFF 20%, ${currentSlide.accentColor} 85%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                '--accent-color': currentSlide.accentColor,
                 fontStyle: 'italic',
                 transition: 'all 0.5s ease'
               }}
@@ -326,22 +475,13 @@ export default function ZeroGravityShowcase() {
         <div
           ref={showcaseRef}
           onMouseMove={handleMouseMove}
-          onMouseEnter={() => setIsPlaying(false)}
+          onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          className="zg-theatre"
           style={{
-            position: 'relative',
-            width: '100%',
-            aspectRatio: '16 / 9',
-            maxHeight: '740px',
-            minHeight: '260px',
-            borderRadius: 'clamp(18px, 2.5vw, 28px)',
-            overflow: 'hidden',
-            backgroundColor: '#050403',
-            boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(226, 130, 159, 0.12)',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
             transform: `perspective(1200px) rotateY(${mouseOffset.x}deg) rotateX(${-mouseOffset.y}deg)`,
             transition: isPlaying ? 'transform 0.5s ease-out' : 'transform 0.15s ease-out'
           }}
@@ -394,34 +534,25 @@ export default function ZeroGravityShowcase() {
               zIndex: 12
             }}
           />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: '65%',
-              background: 'linear-gradient(to top, rgba(5,4,3,0.92) 0%, rgba(5,4,3,0.35) 60%, transparent 100%)',
-              pointerEvents: 'none',
-              zIndex: 12
-            }}
-          />
+          <div className="zg-bottom-gradient" />
 
           {/* Top Bar Controls Inside Theatre */}
           <div
+            className="zg-top-bar"
             style={{
               position: 'absolute',
               top: 'clamp(12px, 2.5vw, 22px)',
-              left: 'clamp(14px, 2.5vw, 28px)',
-              right: 'clamp(14px, 2.5vw, 28px)',
+              left: 'clamp(12px, 2.5vw, 24px)',
+              right: 'clamp(12px, 2.5vw, 24px)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              zIndex: 25
+              zIndex: 25,
+              pointerEvents: 'none'
             }}
           >
             {/* Tag Badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', pointerEvents: 'auto' }}>
               <div
                 style={{
                   display: 'inline-flex',
@@ -430,7 +561,7 @@ export default function ZeroGravityShowcase() {
                   backgroundColor: 'rgba(18, 18, 18, 0.75)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
                   backdropFilter: 'blur(12px)',
-                  padding: '6px 14px',
+                  padding: '5px 12px',
                   borderRadius: '9999px',
                   fontSize: '11px',
                   fontWeight: 700,
@@ -452,6 +583,7 @@ export default function ZeroGravityShowcase() {
 
               {currentIndex === 0 && (
                 <div
+                  className="zg-particles-badge"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -473,12 +605,12 @@ export default function ZeroGravityShowcase() {
             </div>
 
             {/* Play/Pause & Fullscreen Controls */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', pointerEvents: 'auto' }}>
               <button
-                onClick={() => setIsPlaying(!isPlaying)}
+                onClick={togglePlayPause}
                 style={{
-                  width: '36px',
-                  height: '36px',
+                  width: '34px',
+                  height: '34px',
                   borderRadius: '50%',
                   backgroundColor: 'rgba(18, 18, 18, 0.7)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -492,14 +624,14 @@ export default function ZeroGravityShowcase() {
                 }}
                 title={isPlaying ? 'Pause 0-Gravity slides' : 'Resume auto-play'}
               >
-                {isPlaying ? <Pause style={{ width: '15px', height: '15px' }} /> : <Play style={{ width: '15px', height: '15px' }} />}
+                {isPlaying ? <Pause style={{ width: '14px', height: '14px' }} /> : <Play style={{ width: '14px', height: '14px' }} />}
               </button>
 
               <button
                 onClick={() => setIsFullscreenModalOpen(true)}
                 style={{
-                  width: '36px',
-                  height: '36px',
+                  width: '34px',
+                  height: '34px',
                   borderRadius: '50%',
                   backgroundColor: 'rgba(18, 18, 18, 0.7)',
                   border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -513,26 +645,13 @@ export default function ZeroGravityShowcase() {
                 }}
                 title="View full 8K master visual"
               >
-                <Maximize2 style={{ width: '15px', height: '15px' }} />
+                <Maximize2 style={{ width: '14px', height: '14px' }} />
               </button>
             </div>
           </div>
 
-          {/* Bottom Floating Editorial Overlay Card */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 'clamp(14px, 2.5vw, 28px)',
-              left: 'clamp(14px, 2.5vw, 28px)',
-              right: 'clamp(14px, 2.5vw, 28px)',
-              zIndex: 10,
-              display: 'flex',
-              alignItems: 'flex-end',
-              justifyContent: 'space-between',
-              gap: '20px',
-              flexWrap: 'wrap'
-            }}
-          >
+          {/* Bottom Floating Editorial Overlay Card (DESKTOP ONLY) */}
+          <div className="zg-desktop-overlay">
             {/* Left: Product Info in Glass Card */}
             <div
               style={{
@@ -650,7 +769,7 @@ export default function ZeroGravityShowcase() {
                 }}
               >
                 <Eye style={{ width: '14px', height: '14px' }} />
-                <span className="mobile-hide">Details</span>
+                <span>Details</span>
               </button>
 
               <button
@@ -676,13 +795,14 @@ export default function ZeroGravityShowcase() {
           <button
             onClick={handlePrev}
             aria-label="Previous 0-gravity slide"
+            className="zg-arrow-btn zg-arrow-left"
             style={{
               position: 'absolute',
-              left: 'clamp(10px, 2vw, 20px)',
+              left: 'clamp(8px, 1.5vw, 20px)',
               top: '50%',
               transform: 'translateY(-50%)',
-              width: 'clamp(36px, 4vw, 46px)',
-              height: 'clamp(36px, 4vw, 46px)',
+              width: 'clamp(34px, 3.5vw, 44px)',
+              height: 'clamp(34px, 3.5vw, 44px)',
               borderRadius: '50%',
               backgroundColor: 'rgba(18, 18, 18, 0.65)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -692,23 +812,24 @@ export default function ZeroGravityShowcase() {
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              zIndex: 15,
+              zIndex: 18,
               transition: 'all 0.2s'
             }}
           >
-            <ChevronLeft style={{ width: '22px', height: '22px' }} />
+            <ChevronLeft style={{ width: '20px', height: '20px' }} />
           </button>
 
           <button
             onClick={handleNext}
             aria-label="Next 0-gravity slide"
+            className="zg-arrow-btn zg-arrow-right"
             style={{
               position: 'absolute',
-              right: 'clamp(10px, 2vw, 20px)',
+              right: 'clamp(8px, 1.5vw, 20px)',
               top: '50%',
               transform: 'translateY(-50%)',
-              width: 'clamp(36px, 4vw, 46px)',
-              height: 'clamp(36px, 4vw, 46px)',
+              width: 'clamp(34px, 3.5vw, 44px)',
+              height: 'clamp(34px, 3.5vw, 44px)',
               borderRadius: '50%',
               backgroundColor: 'rgba(18, 18, 18, 0.65)',
               border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -718,11 +839,11 @@ export default function ZeroGravityShowcase() {
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              zIndex: 15,
+              zIndex: 18,
               transition: 'all 0.2s'
             }}
           >
-            <ChevronRight style={{ width: '22px', height: '22px' }} />
+            <ChevronRight style={{ width: '20px', height: '20px' }} />
           </button>
 
           {/* Slim Progress Bar at the very bottom */}
@@ -748,18 +869,164 @@ export default function ZeroGravityShowcase() {
           </div>
         </div>
 
+        {/* Dedicated Mobile Product Info Card (Docked directly under theatre on mobile) */}
+        <div className="zg-mobile-card">
+          {/* Category Subtitle & Rating Row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span
+                style={{
+                  width: '7px',
+                  height: '7px',
+                  borderRadius: '50%',
+                  backgroundColor: currentSlide.accentColor,
+                  display: 'inline-block',
+                  boxShadow: `0 0 8px ${currentSlide.accentColor}`
+                }}
+              />
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  color: currentSlide.accentColor
+                }}
+              >
+                {currentSlide.subtitle}
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#FFD700', fontSize: '12px' }}>
+                <Star style={{ width: '13px', height: '13px', fill: '#FFD700' }} />
+                <span style={{ fontWeight: 800 }}>{linkedProduct?.rating || 4.9}</span>
+              </div>
+              <span
+                style={{
+                  fontSize: '10.5px',
+                  color: '#A89F95',
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  padding: '2px 8px',
+                  borderRadius: '9999px',
+                  fontWeight: 700
+                }}
+              >
+                {currentIndex + 1} / {ZERO_GRAVITY_SLIDES.length}
+              </span>
+            </div>
+          </div>
+
+          {/* Product Title */}
+          <h3
+            style={{
+              fontSize: '19px',
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              color: '#FFFFFF',
+              margin: '0 0 6px 0',
+              lineHeight: 1.2
+            }}
+          >
+            {currentSlide.title}
+          </h3>
+
+          {/* Botanical Quote / Description */}
+          <p
+            style={{
+              fontSize: '12px',
+              color: '#D4CDC5',
+              margin: '0 0 10px 0',
+              lineHeight: 1.45
+            }}
+          >
+            {currentSlide.quote}
+          </p>
+
+          {/* Active Botanicals Highlight */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '11px',
+              color: '#A89F95',
+              padding: '8px 10px',
+              backgroundColor: 'rgba(255, 255, 255, 0.04)',
+              borderRadius: '8px',
+              marginBottom: '14px',
+              border: '1px solid rgba(255, 255, 255, 0.06)'
+            }}
+          >
+            <CheckCircle2 style={{ width: '13px', height: '13px', color: currentSlide.accentColor, flexShrink: 0 }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              Active: <strong style={{ color: '#FFFFFF' }}>{currentSlide.highlight}</strong>
+            </span>
+          </div>
+
+          {/* Price & Action Buttons */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '10px',
+              paddingTop: '4px'
+            }}
+          >
+            <div>
+              <div style={{ fontSize: '9.5px', textTransform: 'uppercase', color: '#A89F95', fontWeight: 600, letterSpacing: '0.05em' }}>
+                Price
+              </div>
+              <div style={{ fontSize: '18px', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>
+                {linkedProduct ? formatPrice(linkedProduct.pricePKR, linkedProduct.priceUSD) : 'Rs. 1,599'}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <button
+                onClick={() => linkedProduct && setActiveProduct(linkedProduct)}
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: '#FFFFFF',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  padding: '8px 12px',
+                  borderRadius: '10px',
+                  fontSize: '11.5px',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  cursor: 'pointer'
+                }}
+              >
+                <Eye style={{ width: '13px', height: '13px' }} />
+                <span>Details</span>
+              </button>
+
+              <button
+                onClick={handleAddToCart}
+                className="btn-primary zg-action-btn"
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  borderRadius: '10px'
+                }}
+              >
+                <ShoppingBag style={{ width: '14px', height: '14px' }} />
+                <span>Order Now</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* 16:9 Thumbnail Reel for Instant Jumping */}
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 'clamp(8px, 1.5vw, 14px)',
-            marginTop: '22px',
-            overflowX: 'auto',
-            padding: '8px 4px',
-            scrollbarWidth: 'none'
-          }}
+          className="zg-thumb-reel"
         >
           {ZERO_GRAVITY_SLIDES.map((slide, idx) => {
             const isActive = idx === currentIndex;
