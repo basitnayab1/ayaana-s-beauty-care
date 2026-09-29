@@ -19,7 +19,7 @@ import ProductModal from './components/ProductModal';
 import ModelRoutineModal from './components/ModelRoutineModal';
 import CustomCursor from './components/CustomCursor';
 import ThreeBackground from './components/ThreeBackground';
-import { MessageCircle, Sparkles, GripVertical } from 'lucide-react';
+import { MessageCircle, Sparkles, GripVertical, Search, X } from 'lucide-react';
 import { BRAND_CONFIG } from './data/products';
 
 // Code-split heavy modals to keep initial bundle ultra light on mobile
@@ -31,15 +31,35 @@ const AdminModal = React.lazy(() => import('./components/AdminModal'));
 function MainStore() {
   const { products, isAdminLoggedIn, moveProduct } = useShop();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [catalogSearchQuery, setCatalogSearchQuery] = useState('');
   const [draggedId, setDraggedId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
 
   const catalogRef = useRef(null);
 
-  // Filter products
-  const filteredProducts = selectedCategory === 'all'
-    ? products
-    : products.filter((p) => p.category === selectedCategory);
+  // Filter products by category AND search query
+  const filteredProducts = products.filter((p) => {
+    const categoryMatches = selectedCategory === 'all' || p.category === selectedCategory;
+    if (!categoryMatches) return false;
+
+    if (!catalogSearchQuery.trim()) return true;
+    const q = catalogSearchQuery.trim().toLowerCase();
+    const name = (p.name || '').toLowerCase();
+    const tagline = (p.tagline || '').toLowerCase();
+    const categoryName = (p.categoryName || '').toLowerCase();
+    const category = (p.category || '').toLowerCase();
+    const desc = (p.description || '').toLowerCase();
+    const ingredients = (p.ingredients || '').toLowerCase();
+
+    return (
+      name.includes(q) ||
+      tagline.includes(q) ||
+      categoryName.includes(q) ||
+      category.includes(q) ||
+      desc.includes(q) ||
+      ingredients.includes(q)
+    );
+  });
 
   const handleCategorySelect = (catId) => {
     setSelectedCategory(catId);
@@ -55,6 +75,14 @@ function MainStore() {
     }
   };
 
+  const handleCatalogSearch = (query) => {
+    setCatalogSearchQuery(query);
+    setSelectedCategory('all');
+    if (catalogRef.current) {
+      catalogRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       {/* 1. Interactive 3D WebGL Particle Background */}
@@ -67,6 +95,7 @@ function MainStore() {
       <Navbar
         onCategorySelect={handleCategorySelect}
         onScrollToSection={handleScrollToSection}
+        onCatalogSearch={handleCatalogSearch}
       />
 
       <main style={{ flex: 1, position: 'relative', zIndex: 1 }}>
@@ -113,6 +142,88 @@ function MainStore() {
               </p>
             </div>
 
+            {/* Search Bar in Catalog */}
+            <div style={{ maxWidth: '500px', margin: '0 auto 20px auto', position: 'relative' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  backgroundColor: '#FFFFFF',
+                  border: '1.5px solid rgba(18, 18, 18, 0.1)',
+                  borderRadius: '9999px',
+                  padding: '9px 18px',
+                  boxShadow: 'var(--shadow-sm)'
+                }}
+              >
+                <Search style={{ width: '17px', height: '17px', color: '#C75678', flexShrink: 0 }} />
+                <input
+                  type="text"
+                  value={catalogSearchQuery}
+                  onChange={(e) => setCatalogSearchQuery(e.target.value)}
+                  placeholder="Search products by name, concern, or ingredient (e.g. shampoo, cream)..."
+                  style={{
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontSize: '13.5px',
+                    color: '#121212'
+                  }}
+                />
+                {catalogSearchQuery && (
+                  <button
+                    onClick={() => setCatalogSearchQuery('')}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      color: '#736C65',
+                      padding: '2px',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                    title="Clear search"
+                  >
+                    <X style={{ width: '16px', height: '16px' }} />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Active Search Term Badge */}
+            {catalogSearchQuery && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  marginBottom: '18px',
+                  fontSize: '13px',
+                  color: '#736C65'
+                }}
+              >
+                <span>
+                  Showing results for <strong>"{catalogSearchQuery}"</strong> ({filteredProducts.length} formulations)
+                </span>
+                <button
+                  onClick={() => setCatalogSearchQuery('')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#C75678',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    fontSize: '12px'
+                  }}
+                >
+                  Clear filter
+                </button>
+              </div>
+            )}
+
             {/* Category Filter Pills */}
             <CategoryFilter
               selectedCategory={selectedCategory}
@@ -148,89 +259,134 @@ function MainStore() {
             )}
 
             {/* Products Grid with 3D Tilt Cards and Drag & Drop */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))',
-                gap: '24px'
-              }}
-            >
-              {filteredProducts.map((product) => {
-                const productGlobalIndex = products.findIndex((p) => p.id === product.id);
-                const isFirst = productGlobalIndex === 0;
+            {filteredProducts.length === 0 ? (
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '50px 20px',
+                  background: '#FFFFFF',
+                  borderRadius: '20px',
+                  border: '1px solid var(--border-card)',
+                  margin: '16px 0 32px 0'
+                }}
+              >
+                <div
+                  style={{
+                    width: '52px',
+                    height: '52px',
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--brand-rose-light)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px auto',
+                    color: 'var(--brand-rose-dark)'
+                  }}
+                >
+                  <Search style={{ width: '22px', height: '22px' }} />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 800, marginBottom: '8px', color: '#121212' }}>
+                  No Formulations Found
+                </h3>
+                <p style={{ color: '#736C65', fontSize: '14px', maxWidth: '420px', margin: '0 auto 20px auto' }}>
+                  No products matched your search "{catalogSearchQuery}". Try searching for "cream", "shampoo", "oil", or "whitening".
+                </p>
+                <button
+                  onClick={() => {
+                    setCatalogSearchQuery('');
+                    setSelectedCategory('all');
+                  }}
+                  className="btn-primary"
+                  style={{ padding: '10px 24px', fontSize: '13px' }}
+                >
+                  View All Formulations
+                </button>
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))',
+                  gap: '24px'
+                }}
+              >
+                {filteredProducts.map((product) => {
+                  const productGlobalIndex = products.findIndex((p) => p.id === product.id);
+                  const isFirst = productGlobalIndex === 0;
 
-                return (
-                  <div
-                    key={product.id}
-                    draggable={isAdminLoggedIn}
-                    onDragStart={(e) => {
-                      if (!isAdminLoggedIn) return;
-                      e.dataTransfer.setData('text/plain', product.id);
-                      e.dataTransfer.effectAllowed = 'move';
-                      setDraggedId(product.id);
-                    }}
-                    onDragOver={(e) => {
-                      if (!isAdminLoggedIn) return;
-                      e.preventDefault();
-                      if (dragOverId !== product.id) setDragOverId(product.id);
-                    }}
-                    onDragLeave={() => {
-                      if (dragOverId === product.id) setDragOverId(null);
-                    }}
-                    onDrop={(e) => {
-                      if (!isAdminLoggedIn) return;
-                      e.preventDefault();
-                      const sourceId = e.dataTransfer.getData('text/plain') || draggedId;
-                      if (sourceId && sourceId !== product.id) {
-                        const fromIdx = products.findIndex((p) => p.id === sourceId);
-                        const toIdx = products.findIndex((p) => p.id === product.id);
-                        if (fromIdx !== -1 && toIdx !== -1) {
-                          moveProduct(fromIdx, toIdx);
+                  return (
+                    <div
+                      key={product.id}
+                      draggable={isAdminLoggedIn}
+                      onDragStart={(e) => {
+                        if (!isAdminLoggedIn) return;
+                        e.dataTransfer.setData('text/plain', product.id);
+                        e.dataTransfer.effectAllowed = 'move';
+                        setDraggedId(product.id);
+                      }}
+                      onDragOver={(e) => {
+                        if (!isAdminLoggedIn) return;
+                        e.preventDefault();
+                        if (dragOverId !== product.id) setDragOverId(product.id);
+                      }}
+                      onDragLeave={() => {
+                        if (dragOverId === product.id) setDragOverId(null);
+                      }}
+                      onDrop={(e) => {
+                        if (!isAdminLoggedIn) return;
+                        e.preventDefault();
+                        const sourceId = e.dataTransfer.getData('text/plain') || draggedId;
+                        if (sourceId && sourceId !== product.id) {
+                          const fromIdx = products.findIndex((p) => p.id === sourceId);
+                          const toIdx = products.findIndex((p) => p.id === product.id);
+                          if (fromIdx !== -1 && toIdx !== -1) {
+                            moveProduct(fromIdx, toIdx);
+                          }
                         }
-                      }
-                      setDraggedId(null);
-                      setDragOverId(null);
-                    }}
-                    style={{
-                      position: 'relative',
-                      cursor: isAdminLoggedIn ? 'grab' : 'default',
-                      transition: 'transform 0.2s ease, opacity 0.2s ease',
-                      opacity: draggedId === product.id ? 0.45 : 1,
-                      transform: dragOverId === product.id ? 'scale(1.03)' : 'none',
-                      borderRadius: '24px',
-                      boxShadow: dragOverId === product.id ? '0 0 0 2.5px #C75678, 0 12px 24px rgba(199, 86, 120, 0.2)' : 'none'
-                    }}
-                  >
-                    {isAdminLoggedIn && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: '12px',
-                          left: '12px',
-                          zIndex: 25,
-                          background: isFirst ? '#128C7E' : 'rgba(18, 18, 18, 0.88)',
-                          color: '#FFFFFF',
-                          backdropFilter: 'blur(6px)',
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          fontSize: '11px',
-                          fontWeight: 800,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          pointerEvents: 'none',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-                        }}
-                      >
-                        <GripVertical style={{ width: '12px', height: '12px' }} />
-                        <span>#{productGlobalIndex + 1} {isFirst ? '★ 1st' : ''}</span>
-                      </div>
-                    )}
-                    <ProductCard product={product} />
-                  </div>
-                );
-              })}
-            </div>
+                        setDraggedId(null);
+                        setDragOverId(null);
+                      }}
+                      style={{
+                        position: 'relative',
+                        cursor: isAdminLoggedIn ? 'grab' : 'default',
+                        transition: 'transform 0.2s ease, opacity 0.2s ease',
+                        opacity: draggedId === product.id ? 0.45 : 1,
+                        transform: dragOverId === product.id ? 'scale(1.03)' : 'none',
+                        borderRadius: '24px',
+                        boxShadow: dragOverId === product.id ? '0 0 0 2.5px #C75678, 0 12px 24px rgba(199, 86, 120, 0.2)' : 'none'
+                      }}
+                    >
+                      {isAdminLoggedIn && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '12px',
+                            left: '12px',
+                            zIndex: 25,
+                            background: isFirst ? '#128C7E' : 'rgba(18, 18, 18, 0.88)',
+                            color: '#FFFFFF',
+                            backdropFilter: 'blur(6px)',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            pointerEvents: 'none',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                          }}
+                        >
+                          <GripVertical style={{ width: '12px', height: '12px' }} />
+                          <span>#{productGlobalIndex + 1} {isFirst ? '★ 1st' : ''}</span>
+                        </div>
+                      )}
+                      <ProductCard product={product} />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
 
